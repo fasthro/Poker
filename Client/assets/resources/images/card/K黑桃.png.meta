@@ -1,0 +1,31 @@
+{
+  "ver": "2.2.0",
+  "uuid": "41f8dcb2-dd24-492a-aeb6-849cb818c3ca",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "subMetas": {
+    "K黑桃": {
+      "ver": "1.0.3",
+      "uuid": "fc8228ff-985d-4382-ba23-6911e7b4bb95",
+      "rawTextureUuid": "41f8dcb2-dd24-492a-aeb6-849cb818c3ca",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 125,
+      "height": 162,
+      "rawWidth": 125,
+      "rawHeight": 162,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

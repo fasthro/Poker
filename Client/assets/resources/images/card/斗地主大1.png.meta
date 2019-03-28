@@ -1,0 +1,31 @@
+{
+  "ver": "2.2.0",
+  "uuid": "6e5cfc72-6724-4edd-8616-6412a727496a",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "subMetas": {
+    "斗地主大1": {
+      "ver": "1.0.3",
+      "uuid": "e340157a-b07a-469d-9e1e-7fed43d324c6",
+      "rawTextureUuid": "6e5cfc72-6724-4edd-8616-6412a727496a",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 125,
+      "height": 162,
+      "rawWidth": 125,
+      "rawHeight": 162,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

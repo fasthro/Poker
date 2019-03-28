@@ -1,6 +1,7 @@
 import UIManager from "../manager/UIManager";
 import NetworkManager from "../manager/NetworkManager";
 import ResManager from "../manager/ResManager";
+import ScenceManager from "../manager/ScenceManager";
 
 /*
  * @Author: fasthro
@@ -14,6 +15,7 @@ export enum ManagerType {
     UI,
     Network,
     Resource,
+    Scence,
 }
 
 export interface ManagerInfo {
@@ -34,5 +36,6 @@ export default class ManagerInfos {
         this.infos[ManagerType.UI]        = { name: "ui",          manager: UIManager };
         this.infos[ManagerType.Network]   = { name: "network",     manager: NetworkManager };
         this.infos[ManagerType.Resource]  = { name: "resource",    manager: ResManager };
+        this.infos[ManagerType.Scence]    = { name: "scence",      manager: ScenceManager };
     }
 }

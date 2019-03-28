@@ -1,4 +1,6 @@
 import BaseController from "./BaseController";
+import Game from "../Game";
+import { UILayer } from "../define/UILayer";
 
 /*
  * @Author: fasthro
@@ -28,7 +30,7 @@ export default class MainCtroller extends BaseController implements IController 
     }
 
     getParent(): cc.Node {
-        return cc.find("Canvas");
+        return Game.GetUILayerNode(UILayer.Loading)
     }
 
     getResPath(): string {

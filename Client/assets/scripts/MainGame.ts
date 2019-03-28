@@ -17,6 +17,18 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainGame extends cc.Component {
 
+    @property(cc.Node)
+    public windowNode: cc.Node = null;
+
+    @property(cc.Node)
+    public popupNode: cc.Node = null;
+
+    @property(cc.Node)
+    public loadingNode: cc.Node = null;
+
+    @property(cc.Node)
+    public waitNode: cc.Node = null;
+
     onLoad() {
         // 游戏帧频设置
         cc.game.setFrameRate(GameEnv.frameRate);
@@ -28,8 +40,11 @@ export default class MainGame extends cc.Component {
     }
 
     start() {
+        // 初始化
+        Game.mainGame = this;
+
         // 加载loading界面
-        Game.showUI(ControllerType.Loading);
+        Game.showUI(ControllerType.Launch);
     }
 
     update(dt) {

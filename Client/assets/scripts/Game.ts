@@ -3,6 +3,8 @@ import { ManagerType } from "./define/Managers";
 import ContrlllerCenter from "./center/ContrlllerCenter";
 import { ControllerType } from "./define/Controllers";
 import UIManager from "./manager/UIManager";
+import MainGame from "./MainGame";
+import { UILayer } from "./define/UILayer";
 
 /*
  * @Author: fasthro
@@ -14,7 +16,10 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class Game {
+    // mainGame
+    public static mainGame: MainGame = null;
 
+    // uimanager
     private static m_uiMgr: UIManager = null;
 
     /**
@@ -57,7 +62,35 @@ export default class Game {
     public static showUI(ct: ControllerType, params: any = null) {
         if (!Game.m_uiMgr)
             Game.m_uiMgr = Game.getManager<UIManager>(ManagerType.UI);
-            
+
         Game.m_uiMgr.showUI(ct, params);
+    }
+
+    /**
+     * 关闭 UI
+     * @param ct 控制器类型
+     */
+    public static closeUI(ct: ControllerType): void {
+
+    }
+
+    /**
+     * 获取 UILayer Node
+     * @param layer UILayer
+     */
+    public static GetUILayerNode(layer: UILayer) {
+        if (layer == UILayer.Window) {
+            return Game.mainGame.windowNode;
+        }
+        else if (layer == UILayer.Popup) {
+            return Game.mainGame.popupNode;
+        }
+        else if (layer == UILayer.Loading) {
+            return Game.mainGame.loadingNode;
+        }
+        else if (layer == UILayer.Wait) {
+            return Game.mainGame.waitNode;
+        }
+        return Game.mainGame.node;
     }
 }

@@ -2,6 +2,7 @@ import BaseController from "./BaseController";
 import Game from "../Game";
 import { UILayer } from "../define/UILayer";
 import LaunchView from "../view/LaunchView";
+import { ControllerType } from "../define/Controllers";
 
 /*
  * @Author: fasthro
@@ -21,19 +22,38 @@ export default class LaunchController extends BaseController implements IControl
     }
 
     initialize(): void {
-        
+
     }
 
     onViewCreated(go: any, params: any): void {
-        
+        this.gameObject = go;
+        this.view = this.gameObject.addComponent(LaunchView);
+
+        // 热更新
+
+        // 登录
+
+        // 预加载
+
+        // 进入内城
+        let self = this;
+        Game.loadScene("main", this, (completedCount: number, totalCount: number, item: any) => {
+            // console.log(completedCount);
+            // self.view.progressBar.progress = completedCount / totalCount;
+        }, (error) => {
+            // setTimeout(() => {
+            //     Game.closeUI(ControllerType.Launch);
+            //     Game.showUI(ControllerType.Main);
+            // }, 2000);
+        });
     }
 
     update(dt: any): void {
-        
+
     }
 
     getParent(): cc.Node {
-        return Game.GetUILayerNode(UILayer.Loading);
+        return Game.GetUILayerNode(UILayer.Window);
     }
 
     getResPath(): string {
@@ -41,7 +61,7 @@ export default class LaunchController extends BaseController implements IControl
     }
 
     dispose(): void {
-        
+
     }
 
 

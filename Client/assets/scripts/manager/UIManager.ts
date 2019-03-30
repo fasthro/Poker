@@ -3,6 +3,7 @@ import { ControllerType } from "../define/Controllers";
 import Game from "../Game";
 import ResManager from "./ResManager";
 import { ManagerType } from "../define/Managers";
+import BaseController from "../controller/BaseController";
 
 /*
  * @Author: fasthro
@@ -124,7 +125,20 @@ export default class UIManager extends BaseManager implements IManager {
         }
     }
 
-    public closeUI(t: ControllerType): void {
+    /**
+     * 关闭UI
+     * @param ct controller 类型
+     */
+    public closeUI(ct: ControllerType): void {
+        let controller = Game.getController(ct);
+        if (controller) {
+            controller.dispose();
 
+            let baseController = <BaseController>controller.getBase();
+            if(baseController.canDestroy && baseController.gameObject)
+            {
+                baseController.gameObject.destroy();
+            }
+        }
     }
 }

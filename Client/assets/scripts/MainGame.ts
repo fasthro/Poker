@@ -32,6 +32,9 @@ export default class MainGame extends cc.Component {
     onLoad() {
         // 游戏帧频设置
         cc.game.setFrameRate(GameEnv.frameRate);
+        
+        // 常驻
+        cc.game.addPersistRootNode(this.node);
 
         // 初始化管理器中心服务
         ManagerCenter.initialize();

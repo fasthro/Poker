@@ -1,6 +1,7 @@
 import BaseController from "./BaseController";
 import Game from "../Game";
 import { UILayer } from "../define/UILayer";
+import MainView from "../view/MainView";
 
 /*
  * @Author: fasthro
@@ -11,33 +12,28 @@ import { UILayer } from "../define/UILayer";
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class MainCtroller extends BaseController implements IController {
+export default class MainCtroller extends BaseController {
+    // view
+    private m_view: MainView = null;
     
+    /**
+     * controller create
+     * @param name 
+     */
     public static create(name: string): IController {
         return new MainCtroller();
     }
 
-    initialize(): void {
+    public initialize(): void {
+        this.layer = UILayer.Window;
+    }
+
+    public onViewCreated(go: any, params: any): void {
+        super.onViewCreated(go, params);
 
     }
 
-    onViewCreated(go: any): void {
-
-    }
-
-    update(dt: any): void {
-
-    }
-
-    getParent(): cc.Node {
-        return Game.GetUILayerNode(UILayer.Loading)
-    }
-
-    getResPath(): string {
+    public getResPath(): string {
         return "prefabs/ui/main_view";
-    }
-
-    dispose(): void {
-
     }
 }

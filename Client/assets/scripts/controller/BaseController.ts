@@ -1,3 +1,5 @@
+import { UILayer } from "../define/UILayer";
+
 /*
  * @Author: fasthro
  * @Description: 控制器基类
@@ -7,9 +9,11 @@
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class BaseController {
+export default class BaseController implements IController {
     // 物体节点
     public gameObject: cc.Node = null;
+    // 所在UI层
+    public layer: UILayer = UILayer.Window;
     // 是否可销毁
     public canDestroy: boolean = true;
 
@@ -22,7 +26,40 @@ export default class BaseController {
         return null;
     }
 
-    getBase(): BaseController {
-        return this;
+    /**
+     * 初始化
+     */
+    public initialize(): void {
+
+    }
+
+    /**
+     * 界面创建完成回调
+     * @param go 
+     */
+    public onViewCreated(go: any, params: any): void {
+        this.gameObject = go;
+    }
+
+    /**
+     * 获取界面资源路径
+     */
+    public getResPath(): string {
+        return "";
+    }
+
+    /**
+     * update
+     * @param dt 
+     */
+    public update(dt: any): void {
+
+    }
+
+    /**
+     * 回收释放
+     */
+    public dispose(): void {
+
     }
 }

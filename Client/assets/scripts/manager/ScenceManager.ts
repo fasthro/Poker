@@ -9,24 +9,16 @@ import BaseManager from "./BaseManager";
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class ScenceManager extends BaseManager implements IManager {
+export default class ScenceManager extends BaseManager {
     // 当前场景名字
-    private static sceneName: string = "empty";
+    private m_sceneName: string = "empty";
 
-    public static create(name: string): IManager {
+    /**
+     * manager create
+     * @param name 
+     */
+    public static create(name: string): BaseManager {
         return new ScenceManager();
-    }
-
-    initialize(): void {
-
-    }
-
-    update(dt: any): void {
-
-    }
-
-    dispose(): void {
-
     }
 
     /**
@@ -37,16 +29,17 @@ export default class ScenceManager extends BaseManager implements IManager {
      * @param onLoaded 加载完成回调
      */
     public loadScene(name: string, context?:any, onProgress?: (completedCount: number, totalCount: number, item: any) => void, onLoaded?: Function): void {
-        ScenceManager.sceneName = name;
+        this.m_sceneName = name;
+        let self = this;
         // 预加载场景
         cc.director.preloadScene(name, (completedCount: number, totalCount: number, item: any) => {
             console.log(`ScenceManager -> progress: ${completedCount} ${totalCount}`);
             onProgress.call(context, completedCount, totalCount, item);
         }, (error: Error, asset: cc.SceneAsset) => {
-            cc.director.loadScene(ScenceManager.sceneName, (error) => {
+            cc.director.loadScene(self.m_sceneName, (error) => {
                 console.log(cc.director.getScene().name);
                 onLoaded.call(context, error);
             });
-        });
+       });
     }
 }

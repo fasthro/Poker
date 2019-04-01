@@ -31,8 +31,8 @@ export default class ControllerInfos {
      */
     public static initialize(): void {
         this.infos = {}
-        this.infos[ControllerType.Launch]     = {name: "launch",         controller: LaunchController};
-        this.infos[ControllerType.Loading]    = {name: "loading",        controller: LoadingController};
-        this.infos[ControllerType.Main]       = {name: "main",           controller: MainCtroller};
+        this.infos[ControllerType.Launch] = { name: "launch", controller: LaunchController };
+        this.infos[ControllerType.Loading] = { name: "loading", controller: LoadingController };
+        this.infos[ControllerType.Main] = { name: "main", controller: MainCtroller };
     }
 }

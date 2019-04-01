@@ -33,9 +33,9 @@ export default class ManagerInfos {
      */
     public static initialize(): void {
         this.infos = {}
-        this.infos[ManagerType.UI]        = { name: "ui",          manager: UIManager };
-        this.infos[ManagerType.Network]   = { name: "network",     manager: NetworkManager };
-        this.infos[ManagerType.Resource]  = { name: "resource",    manager: ResManager };
-        this.infos[ManagerType.Scence]    = { name: "scence",      manager: ScenceManager };
+        this.infos[ManagerType.UI] = { name: "ui", manager: UIManager };
+        this.infos[ManagerType.Network] = { name: "network", manager: NetworkManager };
+        this.infos[ManagerType.Resource] = { name: "resource", manager: ResManager };
+        this.infos[ManagerType.Scence] = { name: "scence", manager: ScenceManager };
     }
 }

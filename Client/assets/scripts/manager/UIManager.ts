@@ -4,6 +4,7 @@ import Game from "../Game";
 import ResManager from "./ResManager";
 import { ManagerType } from "../define/Managers";
 import BaseController from "../controller/BaseController";
+import { UILayer } from "../define/UILayer";
 
 /*
  * @Author: fasthro
@@ -18,13 +19,13 @@ const { ccclass, property } = cc._decorator;
  */
 export class UILoadData {
     // 控制器
-    public controller: IController = null;
+    public controller: BaseController = null;
     // 打开UI需要传递的参数
     public params: any = null;
 }
 
 @ccclass
-export default class UIManager extends BaseManager implements IManager {
+export default class UIManager extends BaseManager {
 
     // 资源管理器
     private m_resMgr: ResManager = null;
@@ -38,19 +39,16 @@ export default class UIManager extends BaseManager implements IManager {
     // prefab 缓存池
     private prefabCache: { [key: string]: any };
 
-    public static create(name: string): IManager {
+    /**
+     * manager create
+     * @param name 
+     */
+    public static create(name: string): BaseManager {
         return new UIManager();
     }
 
-    initialize(): void {
+    public initialize(): void{
         this.prefabCache = {};
-    }
-
-    update(dt): void {
-    }
-
-    dispose(): void {
-
     }
 
     /**
@@ -115,12 +113,12 @@ export default class UIManager extends BaseManager implements IManager {
             console.log(`uimanager -> onCreateUI ${loadData.controller.getResPath()}`);
             // 添加到缓存池
             let url = controller.getResPath();
-            if(this.checkCache(url))
-            {
+            if (this.checkCache(url)) {
                 this.addCache(url, prefab);
             }
+            // 设置节点父类
+            UIManager.getUILayerNode(loadData.controller.layer).addChild(gameObject);
             // 回调控制器，UI创建完成
-            controller.getParent().addChild(gameObject);
             loadData.controller.onViewCreated(gameObject, loadData.params);
         }
     }
@@ -133,12 +131,17 @@ export default class UIManager extends BaseManager implements IManager {
         let controller = Game.getController(ct);
         if (controller) {
             controller.dispose();
-
-            let baseController = <BaseController>controller.getBase();
-            if(baseController.canDestroy && baseController.gameObject)
-            {
-                baseController.gameObject.destroy();
+            if (controller.canDestroy && controller.gameObject) {
+                controller.gameObject.destroy();
             }
         }
+    }
+
+    /**
+     * 获取UILayer节点
+     * @param layer UILayer
+     */
+    private static getUILayerNode(layer: UILayer): cc.Node {
+        return cc.find("Canvas");
     }
 }

@@ -2,8 +2,9 @@ import GameEnv from "./define/GameEnv";
 import ManagerCenter from "./center/ManagerCenter";
 import CtrlCenter from "./center/ContrlllerCenter";
 import Game from "./Game";
-import UIManager from "./manager/UIManager";
-import { ManagerType } from "./define/Managers";
+import SceneCenter from "./center/SceneCenter";
+import InitScene from "./scence/LoginScene";
+import { SceneType } from "./define/Scenes";
 import { ControllerType } from "./define/Controllers";
 
 /*
@@ -16,19 +17,6 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class MainGame extends cc.Component {
-
-    @property(cc.Node)
-    public windowNode: cc.Node = null;
-
-    @property(cc.Node)
-    public popupNode: cc.Node = null;
-
-    @property(cc.Node)
-    public loadingNode: cc.Node = null;
-
-    @property(cc.Node)
-    public waitNode: cc.Node = null;
-
     onLoad() {
         // 游戏帧频设置
         cc.game.setFrameRate(GameEnv.frameRate);
@@ -36,21 +24,22 @@ export default class MainGame extends cc.Component {
         // 常驻
         cc.game.addPersistRootNode(this.node);
 
-        // 初始化管理器中心服务
+        // 初始化中心服务
+        // 场景
+        SceneCenter.initialize();
+        // 管理器
         ManagerCenter.initialize();
-        // 初始化控制器中心服务
+        // 控制器
         CtrlCenter.initialize();
     }
 
     start() {
-        // 初始化
-        Game.mainGame = this;
-
-        // 加载loading界面
+        // launch 相关逻辑执行
         Game.showUI(ControllerType.Launch);
     }
 
     update(dt) {
+        SceneCenter.update(dt);
         ManagerCenter.update(dt);
         CtrlCenter.update(dt);
     }

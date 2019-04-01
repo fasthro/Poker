@@ -3,9 +3,12 @@ import { ManagerType } from "./define/Managers";
 import ContrlllerCenter from "./center/ContrlllerCenter";
 import { ControllerType } from "./define/Controllers";
 import UIManager from "./manager/UIManager";
-import MainGame from "./MainGame";
-import { UILayer } from "./define/UILayer";
 import ScenceManager from "./manager/ScenceManager";
+import BaseController from "./controller/BaseController";
+import BaseManager from "./manager/BaseManager";
+import BaseScene from "./scence/BaseScene";
+import SceneInfos, { SceneType } from "./define/Scenes";
+import SceneCenter from "./center/SceneCenter";
 
 /*
  * @Author: fasthro
@@ -17,8 +20,6 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class Game {
-    // mainGame
-    public static mainGame: MainGame = null;
 
     // uiManager
     private static uiMgr: UIManager = null;
@@ -29,43 +30,35 @@ export default class Game {
      * 获取管理器
      * @param t 类型
      */
-    public static getManager<T extends IManager>(t: ManagerType): T {
-        return <T>ManagerCenter.getManager<T>(t);
-    }
-
-    /**
-     * 获取管理器
-     * @param t 类型
-     */
-    public static getManagerByName(t: ManagerType): IManager {
-        return ManagerCenter.getManagerByName(t);
+    public static getManager<T extends BaseManager>(t: ManagerType): T {
+        return <T>ManagerCenter.get<T>(t);
     }
 
     /**
      * 获取控制器
      * @param t 类型
      */
-    public static getController<T extends IController>(t: ControllerType): T {
-        return <T>ContrlllerCenter.getController<T>(t);
+    public static getController<T extends BaseController>(t: ControllerType): T {
+        return <T>ContrlllerCenter.get<T>(t);
     }
 
     /**
-     * 获取控制器
+     * 获取场景
      * @param t 类型
      */
-    public static getControllerByName(t: ControllerType): IManager {
-        return ContrlllerCenter.getControllerByName(t);
+    public static getScene<T extends BaseScene>(t: SceneType): T {
+        return <T>SceneCenter.get<T>(t);
     }
 
     /**
      * 切换场景
-     * @param name 
+     * @param t 
      */
-    public static loadScene(name: string, context?: any, onProgress?: (completedCount: number, totalCount: number, item: any) => void, onLoaded?: Function): void {
+    public static loadScene(t: SceneType, context?: any, onProgress?: (completedCount: number, totalCount: number, item: any) => void, onLoaded?: Function): void {
         if (!Game.sceneMgr)
             Game.sceneMgr = Game.getManager<ScenceManager>(ManagerType.Scence);
 
-        Game.sceneMgr.loadScene(name, context, onProgress, onLoaded);
+        Game.sceneMgr.loadScene(SceneInfos.getSceneName(t), context, onProgress, onLoaded);
     }
 
     /**
@@ -89,25 +82,5 @@ export default class Game {
             Game.uiMgr = Game.getManager<UIManager>(ManagerType.UI);
 
         Game.uiMgr.closeUI(ct);
-    }
-
-    /**
-     * 获取 UILayer Node
-     * @param layer UILayer
-     */
-    public static GetUILayerNode(layer: UILayer) {
-        if (layer == UILayer.Window) {
-            return Game.mainGame.windowNode;
-        }
-        else if (layer == UILayer.Popup) {
-            return Game.mainGame.popupNode;
-        }
-        else if (layer == UILayer.Loading) {
-            return Game.mainGame.loadingNode;
-        }
-        else if (layer == UILayer.Wait) {
-            return Game.mainGame.waitNode;
-        }
-        return Game.mainGame.node;
     }
 }

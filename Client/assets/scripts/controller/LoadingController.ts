@@ -14,34 +14,26 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class LoadingController extends BaseController implements IController {
     // view
-    private view: LoadingView = null;
-
+    private m_view: LoadingView = null;
+    
+    /**
+     * controller create
+     * @param name 
+     */
     public static create(name: string): IController {
         return new LoadingController();
     }
 
-    initialize(): void {
+    public initialize(): void {
+        this.layer = UILayer.Loading;
+    }
+
+    public onViewCreated(go: any, params: any): void {
+        super.onViewCreated(go, params);
 
     }
 
-    onViewCreated(go: any): void {
-        this.gameObject = go;
-        this.view = this.gameObject.addComponent(LoadingView);
-    }
-
-    update(dt: any): void {
-
-    }
-
-    getParent(): cc.Node {
-        return Game.GetUILayerNode(UILayer.Loading)
-    }
-
-    getResPath(): string {
+    public getResPath(): string {
         return "prefabs/ui/loading_view";
-    }
-
-    dispose(): void {
-
     }
 }

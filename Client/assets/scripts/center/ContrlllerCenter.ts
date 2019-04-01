@@ -1,4 +1,5 @@
 import ControllerInfos, { ControllerType } from "../define/Controllers";
+import BaseController from "../controller/BaseController";
 
 /*
  * @Author: fasthro
@@ -12,7 +13,7 @@ const { ccclass, property } = cc._decorator;
 export default class ContrlllerCenter {
 
     // 控制器列表
-    private static contrlllers: { [key: string]: IController };
+    private static contrlllers: { [key: string]: BaseController };
 
     // 初始化标志
     private static initialized: boolean = false;
@@ -42,18 +43,10 @@ export default class ContrlllerCenter {
      * 获取控制器
      * @param t 类型
      */
-    public static getController<T extends IController>(t: ControllerType): T {
+    public static get<T extends BaseController>(t: ControllerType): T {
         return <T>this.contrlllers[t];
     }
-
-    /**
-     * 获取控制器
-     * @param t 类型
-     */
-    public static getControllerByName(t: ControllerType): IController {
-        return this.contrlllers[t];
-    }
-
+    
     /**
      * update
      * @param dt 

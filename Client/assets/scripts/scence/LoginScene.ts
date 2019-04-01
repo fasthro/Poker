@@ -2,17 +2,17 @@ import BaseScene from "./BaseScene";
 
 /*
  * @Author: fasthro
- * @Description: 主场景
+ * @Description: 登录场景
  * @Date: 2019-03-29 16:19:03
  */
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class MainScene extends BaseScene {
+export default class LoginScene extends BaseScene {
     
     public static create(name: string): BaseScene {
-        return new MainScene();
+        return new LoginScene();
     }
 
     public initialize(): void {

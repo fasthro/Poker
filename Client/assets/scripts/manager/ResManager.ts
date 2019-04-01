@@ -9,22 +9,13 @@ import BaseManager from "./BaseManager";
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class ResManager extends BaseManager implements IManager {
-
-    public static create(name: string): IManager {
+export default class ResManager extends BaseManager {
+    /**
+     * manager create
+     * @param name 
+     */
+    public static create(name: string): BaseManager {
         return new ResManager();
-    }
-
-    initialize(): void {
-
-    }
-
-    update(dt: any): void {
-
-    }
-
-    dispose(): void {
-
     }
 
     /**

@@ -51,7 +51,7 @@ export default class NetworkManager extends BaseManager implements IManager {
     /**
      * 创建
      */
-    public static create(name: string): IManager {
+    public static create(name: string): BaseManager {
         return new NetworkManager();
     }
     
@@ -61,14 +61,6 @@ export default class NetworkManager extends BaseManager implements IManager {
     public initialize(): void {
         this.m_socket = null;
         this.m_reConnectCount = 0;
-    }
-
-    /**
-     * 
-     * @param dt 更新
-     */
-    public update(dt: any): void {
-
     }
 
     /**

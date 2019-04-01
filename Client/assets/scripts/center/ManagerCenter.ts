@@ -1,6 +1,7 @@
 import UIManager from "../manager/UIManager";
 import NetworkManager from "../manager/NetworkManager";
 import ManagerInfos, { ManagerType } from "../define/Managers";
+import BaseManager from "../manager/BaseManager";
 
 /*
  * @Author: fasthro
@@ -14,7 +15,7 @@ const { ccclass, property } = cc._decorator;
 export default class ManagerCenter {
 
     // 管理器列表
-    private static managers: { [key: string]: IManager };
+    private static managers: { [key: string]: BaseManager };
 
     // 初始化标志
     private static initialized: boolean = false;
@@ -45,18 +46,10 @@ export default class ManagerCenter {
      * 获取管理器
      * @param t 类型
      */
-    public static getManager<T extends IManager>(t: ManagerType): T {
+    public static get<T extends BaseManager>(t: ManagerType): T {
         return <T>this.managers[t];
     }
-
-    /**
-     * 获取管理器
-     * @param t 类型
-     */
-    public static getManagerByName(t: ManagerType): IManager {
-        return this.managers[t];
-    }
-
+    
     /**
      * update
      * @param dt 

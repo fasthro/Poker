@@ -8,8 +8,6 @@ interface IController {
     initialize(): void;
     onViewCreated(go: any, params: any): void;
     update(dt: any): void;
-    getBase(): any;
-    getParent(): cc.Node;
     getResPath(): string;
     dispose(): void;
 }

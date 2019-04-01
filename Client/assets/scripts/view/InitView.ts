@@ -7,7 +7,7 @@
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class LaunchView extends cc.Component {
+export default class InitView extends cc.Component {
     // 进度条
     @property(cc.ProgressBar)
     public progressBar: cc.ProgressBar = null;

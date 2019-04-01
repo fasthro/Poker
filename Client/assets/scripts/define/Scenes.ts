@@ -1,6 +1,6 @@
 import MainScene from "../scence/MainScene";
 import BattleScene from "../scence/BattleScene";
-import LoginScene from "../scence/LoginScene";
+import InitScene from "../scence/InitScene";
 
 /*
  * @Author: fasthro
@@ -11,7 +11,7 @@ import LoginScene from "../scence/LoginScene";
 const { ccclass, property } = cc._decorator;
 
 export enum SceneType {
-    Login,
+    Init,
     Main,
     Battle,
 }
@@ -31,7 +31,7 @@ export default class SceneInfos {
      */
     public static initialize(): void {
         this.infos = {}
-        this.infos[SceneType.Login] = { name: "login", scene: LoginScene };
+        this.infos[SceneType.Init] = { name: "init", scene: InitScene };
         this.infos[SceneType.Main] = { name: "main", scene: MainScene };
         this.infos[SceneType.Battle] = { name: "battle", scene: BattleScene };
     }

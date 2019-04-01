@@ -33,12 +33,16 @@ export default class ScenceManager extends BaseManager {
         let self = this;
         // 预加载场景
         cc.director.preloadScene(name, (completedCount: number, totalCount: number, item: any) => {
-            console.log(`ScenceManager -> progress: ${completedCount} ${totalCount}`);
-            onProgress.call(context, completedCount, totalCount, item);
+            if(context && onProgress)
+            {
+                onProgress.call(context, completedCount, totalCount, item);
+            }
         }, (error: Error, asset: cc.SceneAsset) => {
             cc.director.loadScene(self.m_sceneName, (error) => {
-                console.log(cc.director.getScene().name);
-                onLoaded.call(context, error);
+                if(context && onLoaded)
+                {
+                    onLoaded.call(context, error);
+                }
             });
        });
     }

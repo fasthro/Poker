@@ -62,6 +62,14 @@ export default class Game {
     }
 
     /**
+     * 进入场景
+     * @param t 
+     */
+    public static enterScene(t: SceneType): void {
+        SceneCenter.enter(t);
+    }
+
+    /**
      * 显示 UI
      * @param ct 控制器类型
      * @param params 打开UI需要传递的参数

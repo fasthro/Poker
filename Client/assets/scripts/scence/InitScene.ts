@@ -1,18 +1,20 @@
 import BaseScene from "./BaseScene";
+import Game from "../Game";
+import { ControllerType } from "../define/Controllers";
 
 /*
  * @Author: fasthro
- * @Description: 主场景
+ * @Description: 初始化场景
  * @Date: 2019-03-29 16:19:03
  */
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class MainScene extends BaseScene {
+export default class InitScene extends BaseScene {
     
     public static create(name: string): BaseScene {
-        return new MainScene();
+        return new InitScene();
     }
 
     /**
@@ -26,7 +28,7 @@ export default class MainScene extends BaseScene {
      * 场景加载完成回调
      */
     public onLoaded(): void {
-
+        Game.showUI(ControllerType.Init);
     }
 
     /**

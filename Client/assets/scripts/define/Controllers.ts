@@ -1,6 +1,6 @@
 import LoadingController from "../controller/LoadingController";
 import MainCtroller from "../controller/MainController";
-import LaunchController from "../controller/LaunchController";
+import InitController from "../controller/InitController";
 
 /*
  * @Author: fasthro
@@ -11,7 +11,7 @@ import LaunchController from "../controller/LaunchController";
 const { ccclass, property } = cc._decorator;
 
 export enum ControllerType {
-    Launch,
+    Init,
     Loading,
     Main,
 }
@@ -31,7 +31,7 @@ export default class ControllerInfos {
      */
     public static initialize(): void {
         this.infos = {}
-        this.infos[ControllerType.Launch] = { name: "launch", controller: LaunchController };
+        this.infos[ControllerType.Init] = { name: "init", controller: InitController };
         this.infos[ControllerType.Loading] = { name: "loading", controller: LoadingController };
         this.infos[ControllerType.Main] = { name: "main", controller: MainCtroller };
     }

@@ -3,9 +3,7 @@ import ManagerCenter from "./center/ManagerCenter";
 import CtrlCenter from "./center/ContrlllerCenter";
 import Game from "./Game";
 import SceneCenter from "./center/SceneCenter";
-import InitScene from "./scence/LoginScene";
 import { SceneType } from "./define/Scenes";
-import { ControllerType } from "./define/Controllers";
 
 /*
  * @Author: fasthro
@@ -34,8 +32,7 @@ export default class MainGame extends cc.Component {
     }
 
     start() {
-        // launch 相关逻辑执行
-        Game.showUI(ControllerType.Launch);
+        Game.enterScene(SceneType.Init);
     }
 
     update(dt) {

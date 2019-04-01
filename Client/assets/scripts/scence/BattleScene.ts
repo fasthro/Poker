@@ -15,14 +15,37 @@ export default class BattleScene extends BaseScene {
         return new BattleScene();
     }
 
+    /**
+     * 场景初始化
+     */
     public initialize(): void {
 
     }
 
+    /**
+     * 场景加载完成回调
+     */
+    public onLoaded(): void {
+
+    }
+
+    /**
+     * 退出场景回调
+     */
+    public onExit(): void {
+
+    }
+
+    /**
+     * update
+     */
     public update(dt: any): void {
 
     }
 
+    /**
+     * 回收释放
+     */
     public dispose(): void {
 
     }

@@ -5,6 +5,7 @@ import Game from "./Game";
 import SceneCenter from "./center/SceneCenter";
 import { SceneType } from "./define/Scenes";
 import GameCenter from "./center/GameCenter";
+import DDZ = require("./game/ddz/DDZ");
 
 /*
  * @Author: fasthro
@@ -35,7 +36,8 @@ export default class MainGame extends cc.Component {
     }
 
     start() {
-        Game.enterScene(SceneType.Init);
+        // Game.enterScene(SceneType.Init);
+        console.log(DDZ.Core.deal().x);
     }
 
     update(dt) {

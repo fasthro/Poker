@@ -20,9 +20,4 @@ export default class InitView extends cc.Component {
         this.progressBar = this.node.getChildByName("progress").getComponent(cc.ProgressBar);
         this.rateLable = this.progressBar.node.getChildByName("rate").getComponent(cc.Label);
     }
-
-    start() {
-        this.progressBar.progress = 0;
-        this.rateLable.string = "0%";
-    }
 }

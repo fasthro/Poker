@@ -9,8 +9,6 @@ import ScenceManager from "../manager/ScenceManager";
  * @Date: 2019-03-26 16:11:04
  */
 
-const { ccclass, property } = cc._decorator;
-
 export enum ManagerType {
     UI,
     Network,
@@ -23,7 +21,6 @@ export interface ManagerInfo {
     manager: any;
 }
 
-@ccclass
 export default class ManagerInfos {
     // manager infos 
     public static infos: { [key: number]: ManagerInfo };

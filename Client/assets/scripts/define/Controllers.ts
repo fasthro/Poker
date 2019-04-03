@@ -1,6 +1,7 @@
 import LoadingController from "../controller/LoadingController";
 import MainCtroller from "../controller/MainController";
 import InitController from "../controller/InitController";
+import DDZCtroller from "../controller/DDZCtroller";
 
 /*
  * @Author: fasthro
@@ -8,12 +9,11 @@ import InitController from "../controller/InitController";
  * @Date: 2019-03-26 16:11:04
  */
 
-const { ccclass, property } = cc._decorator;
-
 export enum ControllerType {
     Init,
     Loading,
     Main,
+    DDZ,
 }
 
 export interface ControllerInfo {
@@ -21,7 +21,6 @@ export interface ControllerInfo {
     controller: any;
 }
 
-@ccclass
 export default class ControllerInfos {
     // controller infos 
     public static infos: { [key: number]: ControllerInfo };
@@ -34,5 +33,6 @@ export default class ControllerInfos {
         this.infos[ControllerType.Init] = { name: "init", controller: InitController };
         this.infos[ControllerType.Loading] = { name: "loading", controller: LoadingController };
         this.infos[ControllerType.Main] = { name: "main", controller: MainCtroller };
+        this.infos[ControllerType.DDZ] = { name: "ddz", controller: DDZCtroller };
     }
 }

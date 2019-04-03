@@ -36,12 +36,12 @@
     "zip": false
   },
   "startScene": "fd2bd107-1c8f-4827-92a0-9e7fb011edfd",
-  "title": "Client",
+  "title": "JK",
   "webOrientation": "auto",
   "wechatgame": {
     "REMOTE_SERVER_ROOT": "",
-    "appid": "wx6ac3f5090a6b99c5",
-    "orientation": "portrait",
+    "appid": "wx829a8ec7a50b1ea9",
+    "orientation": "landscape",
     "subContext": ""
   },
   "xxteaKey": "66a21ece-2f5a-48",

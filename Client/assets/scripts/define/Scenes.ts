@@ -8,8 +8,6 @@ import InitScene from "../scence/InitScene";
  * @Date: 2019-04-01 11:26:57
  */
 
-const { ccclass, property } = cc._decorator;
-
 export enum SceneType {
     Init,
     Main,
@@ -21,7 +19,6 @@ export interface SceneInfo {
     scene: any;
 }
 
-@ccclass
 export default class SceneInfos {
     // scene infos 
     public static infos: { [key: number]: SceneInfo };
@@ -37,10 +34,10 @@ export default class SceneInfos {
     }
 
     /**
-     * 获取场景名称
+     * 获取场景信息
      * @param t SceneType
      */
-    public static getSceneName(t: SceneType): string {
-        return this.infos[t].name;
+    public static getSceneInfo(t: SceneType): SceneInfo {
+        return this.infos[t];
     }
 }

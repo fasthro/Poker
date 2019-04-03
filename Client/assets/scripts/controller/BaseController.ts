@@ -14,6 +14,8 @@ export default class BaseController implements IController {
     public gameObject: cc.Node = null;
     // 所在UI层
     public layer: UILayer = UILayer.Window;
+    // 是否处于激活状态
+    public active: boolean = false;
     // 是否可销毁
     public canDestroy: boolean = true;
 
@@ -30,7 +32,7 @@ export default class BaseController implements IController {
      * 初始化
      */
     public initialize(): void {
-
+        this.active = false;
     }
 
     /**
@@ -39,6 +41,7 @@ export default class BaseController implements IController {
      */
     public onViewCreated(go: any, params: any): void {
         this.gameObject = go;
+        this.active = true;
     }
 
     /**
@@ -60,6 +63,6 @@ export default class BaseController implements IController {
      * 回收释放
      */
     public dispose(): void {
-
+        this.active = false;
     }
 }

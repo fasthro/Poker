@@ -6,7 +6,7 @@
 
 export interface IScene {
     initialize(): void;
-    onLoaded(): void;
+    onLoaded(customData?: any): void;
     onExit(): void;
     update(dt): void;
     dispose(): void;

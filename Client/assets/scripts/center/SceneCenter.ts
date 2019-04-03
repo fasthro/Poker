@@ -1,4 +1,4 @@
-import SceneInfos, { SceneType } from "../define/Scenes";
+import SceneInfos, { SceneType, SceneInfo } from "../define/Scenes";
 import BaseScene from "../scence/BaseScene";
 import Game from "../Game";
 
@@ -48,11 +48,15 @@ export default class SceneCenter {
         return <T>this.scenes[t];
     }
 
+    public static getSceneInfo(t: SceneType): SceneInfo{
+        return SceneInfos.getSceneInfo(t);
+    }
+
     /**
      * 进入场景
      * @param t 
      */
-    public static enter(t: SceneType): void {
+    public static enter(t: SceneType, customData?: any): void {
         let scene: BaseScene = this.get<BaseScene>(t);
         Game.loadScene(t, this, (completedCount: number, totalCount: number, item: any) => {
 
@@ -61,7 +65,7 @@ export default class SceneCenter {
             {
                 this.lastEnterScene.onExit();
             }
-            scene.onLoaded();
+            scene.onLoaded(customData);
         });
     }
 

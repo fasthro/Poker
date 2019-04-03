@@ -1,4 +1,7 @@
 import BaseScene from "./BaseScene";
+import Game from "../Game";
+import { ControllerType } from "../define/Controllers";
+import { GameType } from "../define/Games";
 
 /*
  * @Author: fasthro
@@ -25,8 +28,8 @@ export default class BattleScene extends BaseScene {
     /**
      * 场景加载完成回调
      */
-    public onLoaded(): void {
-
+    public onLoaded(customData?: any): void {
+       Game.showUI(Game.getGameInfo(customData).controllerType);
     }
 
     /**

@@ -1,4 +1,6 @@
 import BaseScene from "./BaseScene";
+import Game from "../Game";
+import { ControllerType } from "../define/Controllers";
 
 /*
  * @Author: fasthro
@@ -25,8 +27,9 @@ export default class MainScene extends BaseScene {
     /**
      * 场景加载完成回调
      */
-    public onLoaded(): void {
-
+    public onLoaded(customData?: any): void {
+        // 打开主界面
+        Game.showUI(ControllerType.Main);
     }
 
     /**

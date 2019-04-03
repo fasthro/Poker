@@ -4,6 +4,7 @@ import CtrlCenter from "./center/ContrlllerCenter";
 import Game from "./Game";
 import SceneCenter from "./center/SceneCenter";
 import { SceneType } from "./define/Scenes";
+import GameCenter from "./center/GameCenter";
 
 /*
  * @Author: fasthro
@@ -29,6 +30,8 @@ export default class MainGame extends cc.Component {
         ManagerCenter.initialize();
         // 控制器
         CtrlCenter.initialize();
+        // 游戏
+        GameCenter.initialize();
     }
 
     start() {

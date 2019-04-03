@@ -27,7 +27,7 @@ export default class InitScene extends BaseScene {
     /**
      * 场景加载完成回调
      */
-    public onLoaded(): void {
+    public onLoaded(customData?: any): void {
         Game.showUI(ControllerType.Init);
     }
 

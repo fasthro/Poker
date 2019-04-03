@@ -4,9 +4,6 @@
  * @Date: 2019-03-26 16:36:24
  */
 
-const {ccclass, property} = cc._decorator;
-
-@ccclass
 export default class GameEnv{
 
     // 游戏帧频

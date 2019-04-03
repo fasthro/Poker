@@ -82,11 +82,201 @@ module DDZ {
          * @param cards 
          * @returns 返回排序后的牌列表
          */
-        public static sortSpecial(cards: Array<number>): void {
+        public static sortSpecial(cards: Array<number>): Array<number> {
             let ncs = this.absoluteCards(cards);
+            ncs.sort();
             ncs.reverse();
-            
-            // let newCards = this.
+
+            let newCards: Array<number> = [];
+
+            let index: number = 0;
+
+            // 查找所有炸弹
+            while (index < ncs.length && ncs.length > 3) {
+                let c1 = Math.floor(ncs[index] / 4);
+                let c2 = Math.floor(ncs[index + 1] / 4);
+                let c3 = Math.floor(ncs[index + 2] / 4);
+                let c4 = Math.floor(ncs[index + 3] / 4);
+
+                if (c1 == c2 && c2 == c3 && c3 == c4) {
+                    newCards.push(ncs[index]);
+                    newCards.push(ncs[index + 1]);
+                    newCards.push(ncs[index + 2]);
+                    newCards.push(ncs[index + 3]);
+
+                    ncs.splice(index, 1);
+                    ncs.splice(index, 1);
+                    ncs.splice(index, 1);
+                    ncs.splice(index, 1);
+                }
+                index++;
+            }
+
+            // 查找所有的三条
+            index = 0;
+            while (index < ncs.length && ncs.length > 2) {
+                let c1 = Math.floor(ncs[index] / 4);
+                let c2 = Math.floor(ncs[index + 1] / 4);
+                let c3 = Math.floor(ncs[index + 2] / 4);
+
+                if (c1 == c2 && c2 == c3) {
+                    newCards.push(ncs[index]);
+                    newCards.push(ncs[index + 1]);
+                    newCards.push(ncs[index + 2]);
+
+                    ncs.splice(index, 1);
+                    ncs.splice(index, 1);
+                    ncs.splice(index, 1);
+                }
+                index++;
+            }
+
+            // 查找所有的对子
+            index = 0;
+            while (index < ncs.length && ncs.length > 1) {
+                let c1 = Math.floor(ncs[index] / 4);
+                let c2 = Math.floor(ncs[index + 1] / 4);
+
+                if (c1 == c2 && ncs[index] < 64) {
+                    newCards.push(ncs[index]);
+                    newCards.push(ncs[index + 1]);
+
+                    ncs.splice(index, 1);
+                    ncs.splice(index, 1);
+                }
+                index++;
+            }
+
+            // 剩下的单张
+            for (let i = 0; i < ncs.length; i++) {
+                newCards.push(ncs[i]);
+            }
+
+            return this.unAbsoluteCards(newCards);
+        }
+
+        /**
+         * 是不是对子
+         * @param cards 
+         */
+        public static isPair(cards: Array<number>): boolean {
+            if (cards.length != 2)
+                return false;
+
+            let c1 = Math.floor(cards[0] / 4);
+            let c2 = Math.floor(cards[1] / 4);
+            return c1 == c2;
+        }
+
+        /**
+         * 是不是三条
+         * @param cards 
+         */
+        public static isTripleton(cards: Array<number>): boolean {
+            if (cards.length != 3)
+                return false;
+
+            let c1 = Math.floor(cards[0] / 4);
+            let c2 = Math.floor(cards[1] / 4);
+            let c3 = Math.floor(cards[2] / 4);
+            return c1 == c2 && c2 == c3;
+        }
+
+        /**
+         * 是不是四张炸弹
+         * @param cards 
+         */
+        public static isFourBomb(cards: Array<number>): boolean {
+            if (cards.length != 4)
+                return false;
+
+            let c1 = Math.floor(cards[0] / 4);
+            let c2 = Math.floor(cards[1] / 4);
+            let c3 = Math.floor(cards[2] / 4);
+            let c4 = Math.floor(cards[3] / 4);
+            return c1 == c2 && c2 == c3 && c3 == c4;
+        }
+
+        /**
+         * 是不是王炸
+         * @param cards 
+         */
+        public static isKingBomb(cards: Array<number>): boolean {
+            if (cards.length != 2)
+                return false;
+
+            return cards[0] == 2 && cards[1] == 3;
+        }
+
+        /**
+         * 是不是炸弹
+         * @param cards 
+         */
+        public static isBomb(cards: Array<number>): boolean {
+            return this.isFourBomb(cards) || this.isKingBomb(cards);
+        }
+
+        /**
+         * 是不是三带二
+         * @param cards 
+         * @returns 0 - 不是三带二，abs - 三带二的值(比如33355,返回3的绝对值,用于比较大小)
+         */
+        public static isTripletonPair(cards: Array<number>): number {
+            if (cards.length != 5)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let c1 = Math.floor(ncs[0] / 4);
+            let c2 = Math.floor(ncs[1] / 4);
+            let c3 = Math.floor(ncs[2] / 4);
+            let c4 = Math.floor(ncs[3] / 4);
+            let c5 = Math.floor(ncs[4] / 4);
+
+            // 不能带双王,牌中不能存在王
+            for (let i = 0; i < ncs.length; i++) {
+                if (ncs[i] == 64 || ncs[i] == 65)
+                    return 0;
+            }
+
+            // 33355
+            if (c1 == c2 && c2 == c3 && c4 == c5) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 55333
+            else if (c1 == c2 && c3 == c4 && c4 == c5) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是三带一
+         * @param cards 
+         * @returns 0 - 不是三带一，abs - 三带一的值(比如3335,返回3的绝对值,用于比较大小)
+         */
+        public static isTripletonSingle(cards: Array<number>): number {
+            if (cards.length != 4)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let c1 = Math.floor(ncs[0] / 4);
+            let c2 = Math.floor(ncs[1] / 4);
+            let c3 = Math.floor(ncs[2] / 4);
+            let c4 = Math.floor(ncs[3] / 4);
+
+            // 3335
+            if (c1 == c2 && c2 == c3) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 5333
+            else if (c2 == c3 && c3 == c4) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            return 0;
         }
 
         /**
@@ -121,7 +311,7 @@ module DDZ {
          */
         private static unAbsoluteCard(card: number): number {
             if (card < 56) return card;
-            else if (card < 55 && card > 64) return card - 52; // A || 2
+            else if (card > 55 && card < 64) return card - 52; // A || 2
             else if (card == 65) return 2;                     // 大王
             else if (card == 64) return 3;                     // 小王
         }
@@ -135,6 +325,19 @@ module DDZ {
             let ncs: Array<number> = [];
             for (let i = 0; i < cards.length; i++) {
                 ncs.push(this.unAbsoluteCard(cards[i]));
+            }
+            return ncs;
+        }
+
+        /**
+         * 复制一份新牌，避免污染原始数据
+         * @param cards 
+         */
+        private static copyCards(cards: Array<number>): Array<number> {
+            let ncs: Array<number> = [];
+            // 复制一份，避免改变原始数据
+            for (let i = 0; i < cards.length; i++) {
+                ncs.push(cards[i]);
             }
             return ncs;
         }

@@ -244,17 +244,13 @@ module DDZ {
             if (c1 == c2 && c2 == c3 && c4 == c5) {
                 return this.unAbsoluteCard(ncs[0]);
             }
-            // 55333
-            else if (c1 == c2 && c3 == c4 && c4 == c5) {
-                return this.unAbsoluteCard(ncs[2]);
-            }
             return 0;
         }
 
         /**
          * 是不是三带一
          * @param cards 
-         * @returns 0 - 不是三带一，abs - 三带一的值(比如3335,返回3的绝对值,用于比较大小)
+         * @returns 0 - 不是三带一，abs - 三带一的值(比如3335,返回3,用于比较大小)
          */
         public static isTripletonSingle(cards: Array<number>): number {
             if (cards.length != 4)
@@ -272,11 +268,134 @@ module DDZ {
             if (c1 == c2 && c2 == c3) {
                 return this.unAbsoluteCard(ncs[0]);
             }
-            // 5333
-            else if (c2 == c3 && c3 == c4) {
-                return this.unAbsoluteCard(ncs[2]);
-            }
             return 0;
+        }
+
+        /**
+         * 是不是顺子
+         * @param cards 
+         * @returns 0 - 不是顺子,abs - 顺子起始牌值(比如34567,返回3,用于比较大小)
+         */
+        public static isStraight(cards: Array<number>): number {
+            if (cards.length != 5)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            // 最低3开头, 最高 A 结尾
+            if (ncs[0] > 11 && ncs[ncs.length - 1] < 60) {
+                for (let i = 0; i < ncs.length - 1; i++) {
+                    let card = Math.floor(ncs[i] / 4);
+                    let nextCard = Math.floor(ncs[i + 1] / 4);
+                    if (nextCard - card != 1)
+                        return 0
+                }
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            return 0
+        }
+
+        /**
+         * 是不是双顺子
+         * @param cards 
+         * @returns 0 - 不是顺子,abs - 顺子起始牌值(比如334455,返回3,用于比较大小)
+         */
+        public static isStraight2(cards: Array<number>): number {
+            if (cards.length > 5 && cards.length % 2 == 0) {
+                let ncs = this.absoluteCards(this.copyCards(cards));
+                ncs.sort();
+
+                // 最低3开头, 最高 A 结尾
+                if (ncs[0] > 11 && ncs[ncs.length - 1] < 60) {
+                    let index = 0;
+                    for (let i = 0; i < ncs.length / 2 - 1; i++) {
+                        index = i * 2;
+                        // 比较 i 对牌是否为对子
+                        let card1 = Math.floor(ncs[index] / 4);
+                        let nextCard1 = Math.floor(ncs[index + 1] / 4);
+                        if (card1 != nextCard1)
+                            return 0
+
+                        index = (i + 1) * 2;
+                        // 比较 i + 1 对牌是否为对子
+                        let card2 = Math.floor(ncs[index] / 4);
+                        let nextCard2 = Math.floor(ncs[index + 1] / 4);
+                        if (card2 != nextCard2)
+                            return 0
+
+                        // 比较 i 对和 i+1 对是否连续
+                        if (card2 - card1 != 1)
+                            return 0;
+                    }
+                    return this.unAbsoluteCard(ncs[0]);
+                }
+            }
+            return 0
+        }
+
+        /**
+         * 是不是三顺子
+         * @param cards 
+         * @returns 0 - 不是顺子,abs - 顺子起始牌值(比如333444555,返回3,用于比较大小)
+         */
+        public static isStraight3(cards: Array<number>): number {
+            if (cards.length > 5 && cards.length % 3 == 0) {
+                let ncs = this.absoluteCards(this.copyCards(cards));
+                ncs.sort();
+
+                // 最低3开头, 最高 A 结尾
+                if (ncs[0] > 11 && ncs[ncs.length - 1] < 60) {
+                    let index = 0;
+                    for (let i = 0; i < ncs.length / 3 - 1; i++) {
+                        index = i * 3;
+                        // 比较 i 对牌是否为对子
+                        let card1 = Math.floor(ncs[index] / 4);
+                        let nextCard1 = Math.floor(ncs[index + 1] / 4);
+                        let lastCard1 = Math.floor(ncs[index + 2] / 4);
+                        if (card1 != nextCard1 || card1 != lastCard1)
+                            return 0
+
+                        index = (i + 1) * 3;
+                        // 比较 i + 1 对牌是否为对子
+                        let card2 = Math.floor(ncs[index] / 4);
+                        let nextCard2 = Math.floor(ncs[index + 1] / 4);
+                        let lastCard2 = Math.floor(ncs[index + 2] / 4);
+                        if (card2 != nextCard2 || card2 != lastCard2)
+                            return 0
+
+                        // 比较 i 对和 i+1 对是否连续
+                        if (card2 - card1 != 1)
+                            return 0;
+                    }
+                    return this.unAbsoluteCard(ncs[0]);
+                }
+            }
+            return 0
+        }
+
+        /**
+         * 是不是飞机-六带四
+         * @param cards 
+         * @returns 0 - 不是飞机-六带四,abs - 飞机-六带四起始牌值(比如3334445566,返回3,用于比较大小)
+         */
+        public static isPlaneSixFour(cards: Array<number>): number {
+            if (cards.length != 10)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+            
+        }
+
+        /**
+         * 是不是飞机-六带二
+         * @param cards 
+         * @returns 0 - 不是飞机-六带二,abs - 飞机-六带二起始牌值(比如33344456,返回3,用于比较大小)
+         */
+        public static isPlaneSixTwo(cards: Array<number>): number {
+            if (cards.length != 8)
+                return 0;
         }
 
         /**

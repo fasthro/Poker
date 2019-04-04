@@ -6,6 +6,7 @@ import SceneCenter from "./center/SceneCenter";
 import { SceneType } from "./define/Scenes";
 import GameCenter from "./center/GameCenter";
 import DDZ = require("./game/ddz/DDZ");
+import Cards from "./game/Cards";
 
 /*
  * @Author: fasthro
@@ -35,9 +36,14 @@ export default class MainGame extends cc.Component {
         GameCenter.initialize();
     }
 
+    @property(Cards)
+    public cardsCom: Cards = null;
+    
     start() {
         // Game.enterScene(SceneType.Init);
-        console.log(DDZ.Core.deal().x);
+        let cards = [16, 17, 18, 20, 21, 22, 24, 25, 26];
+        this.cardsCom.initCards(cards);
+        console.log(DDZ.Core.isStraight3(cards));
     }
 
     update(dt) {

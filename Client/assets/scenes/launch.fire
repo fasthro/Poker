@@ -17,7 +17,7 @@
         "__id__": 2
       },
       {
-        "__id__": 6
+        "__id__": 9
       }
     ],
     "_active": false,
@@ -69,13 +69,16 @@
     "_children": [
       {
         "__id__": 3
+      },
+      {
+        "__id__": 5
       }
     ],
     "_active": true,
     "_level": 1,
     "_components": [
       {
-        "__id__": 5
+        "__id__": 8
       }
     ],
     "_prefab": null,
@@ -206,6 +209,102 @@
     "_id": "15xB1e6gxIC4pytXeLIRZR"
   },
   {
+    "__type__": "cc.Node",
+    "_name": "cards",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 2
+    },
+    "_children": [],
+    "_active": true,
+    "_level": 2,
+    "_components": [
+      {
+        "__id__": 6
+      }
+    ],
+    "_prefab": {
+      "__id__": 7
+    },
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 0,
+      "height": 0
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_position": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": -540,
+      "z": 0
+    },
+    "_scale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_rotationX": 0,
+    "_rotationY": 0,
+    "_quat": {
+      "__type__": "cc.Quat",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "groupIndex": 0,
+    "_id": "ffV9cB0vhC86mLtTA5I5+b"
+  },
+  {
+    "__type__": "ff6a00SVQpM+pgMGzxj3eY4",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 5
+    },
+    "_enabled": true,
+    "atlas": {
+      "__uuid__": "8238bac1-e958-448c-abb0-7b5199b6fd7b"
+    },
+    "cardPrefab": {
+      "__uuid__": "9f14d9db-a247-4bd1-aefc-990d61ad1599"
+    },
+    "cardSize": {
+      "__type__": "cc.Vec2",
+      "x": 250,
+      "y": 334
+    },
+    "cardSpace": 80,
+    "cardDequeueSpace": 60,
+    "_id": "a1QIOjMKhPgr+ZHfvM5phm"
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 5
+    },
+    "asset": {
+      "__uuid__": "b40f5d79-7c4e-424e-bba2-0daadb786fcf"
+    },
+    "fileId": "cahxOiO9ZJpoJ8XvCRySke",
+    "sync": false
+  },
+  {
     "__type__": "cc.Canvas",
     "_name": "",
     "_objFlags": 0,
@@ -234,7 +333,7 @@
     "_level": 1,
     "_components": [
       {
-        "__id__": 7
+        "__id__": 10
       }
     ],
     "_prefab": null,
@@ -287,9 +386,12 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 6
+      "__id__": 9
     },
     "_enabled": true,
+    "cardsCom": {
+      "__id__": 6
+    },
     "_id": "67K/39rpNCs4XuVtxN5IfJ"
   }
 ]

@@ -21,7 +21,7 @@ export default class MainGame extends cc.Component {
     onLoad() {
         // 游戏帧频设置
         cc.game.setFrameRate(GameEnv.frameRate);
-        
+
         // 常驻
         cc.game.addPersistRootNode(this.node);
 
@@ -38,12 +38,12 @@ export default class MainGame extends cc.Component {
 
     @property(Cards)
     public cardsCom: Cards = null;
-    
+
     start() {
         // Game.enterScene(SceneType.Init);
-        let cards = [16, 17, 18, 20, 21, 22, 24, 25, 26];
+        let cards = [15, 16, 17, 18, 20, 21, 22, 23];
         this.cardsCom.initCards(cards);
-        console.log(DDZ.Core.isStraight3(cards));
+        console.log(DDZ.Core.isPlaneSixTwo(cards));
     }
 
     update(dt) {

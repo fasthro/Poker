@@ -86,10 +86,19 @@ module DDZ {
             let ncs = this.absoluteCards(cards);
             ncs.sort();
             ncs.reverse();
-
+            console.log(ncs);
             let newCards: Array<number> = [];
 
             let index: number = 0;
+
+            // 双王
+            if (ncs[0] == 65 && ncs[1] == 64) {
+                newCards.push(ncs[0]);
+                newCards.push(ncs[1]);
+
+                ncs.splice(index, 1);
+                ncs.splice(index, 1);
+            }
 
             // 查找所有炸弹
             while (index < ncs.length && ncs.length > 3) {
@@ -108,8 +117,9 @@ module DDZ {
                     ncs.splice(index, 1);
                     ncs.splice(index, 1);
                     ncs.splice(index, 1);
+                } else {
+                    index++;
                 }
-                index++;
             }
 
             // 查找所有的三条
@@ -128,7 +138,9 @@ module DDZ {
                     ncs.splice(index, 1);
                     ncs.splice(index, 1);
                 }
-                index++;
+                else {
+                    index++;
+                }
             }
 
             // 查找所有的对子
@@ -143,8 +155,9 @@ module DDZ {
 
                     ncs.splice(index, 1);
                     ncs.splice(index, 1);
+                } else {
+                    index++;
                 }
-                index++;
             }
 
             // 剩下的单张
@@ -385,7 +398,37 @@ module DDZ {
 
             let ncs = this.absoluteCards(this.copyCards(cards));
             ncs.sort();
-            
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+
+            // 555666-7788
+            if (card1 == card3
+                && card4 == card6
+                && card7 == card8 && card9 == card10) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 3344-555666
+            else if (card1 == card2 && card3 == card4
+                && card5 == card7
+                && card8 == card10) {
+                return this.unAbsoluteCard(ncs[4]);
+            }
+            // 33-555666-77
+            else if (card1 == card2 && card9 == card10
+                && card3 == card5
+                && card6 == card8) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            return 0;
         }
 
         /**
@@ -396,6 +439,32 @@ module DDZ {
         public static isPlaneSixTwo(cards: Array<number>): number {
             if (cards.length != 8)
                 return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+
+            // 555666-78
+            if (card1 == card3 && card4 == card6) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 34-555666
+            else if (card3 == card5 && card6 == card8) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            // 3-555666-7
+            else if (card2 == card4 && card5 == card7) {
+                return this.unAbsoluteCard(ncs[1]);
+            }
+            return 0;
         }
 
         /**

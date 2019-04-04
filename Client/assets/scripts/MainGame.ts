@@ -41,9 +41,16 @@ export default class MainGame extends cc.Component {
 
     start() {
         // Game.enterScene(SceneType.Init);
-        let cards = [15, 16, 17, 18, 20, 21, 22, 23];
+        let cards = [
+            16, 17, 18,
+            20, 21, 22,
+            24, 25, 26,
+            28, 29, 30,
+            14, 15, 32, 33,
+            36, 37, 38, 39
+        ];
         this.cardsCom.initCards(cards);
-        console.log(DDZ.Core.isPlaneSixTwo(cards));
+        console.log(DDZ.Core.isTwelveEight(cards));
     }
 
     update(dt) {

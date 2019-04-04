@@ -388,6 +388,48 @@ module DDZ {
         }
 
         /**
+         * 是不是四顺子
+         * @param cards 
+         * @returns 0 - 不是顺子,abs - 顺子起始牌值(比如333344445555,返回3,用于比较大小)
+         */
+        public static isStraight4(cards: Array<number>): number {
+            if (cards.length > 7 && cards.length % 4 == 0) {
+                let ncs = this.absoluteCards(this.copyCards(cards));
+                ncs.sort();
+
+                // 最低3开头, 最高 A 结尾
+                if (ncs[0] > 11 && ncs[ncs.length - 1] < 60) {
+                    let index = 0;
+                    for (let i = 0; i < ncs.length / 4 - 1; i++) {
+                        index = i * 4;
+                        // 比较 i 对牌是否为对子
+                        let cardP1 = Math.floor(ncs[index] / 4);
+                        let cardP2 = Math.floor(ncs[index + 1] / 4);
+                        let cardP3 = Math.floor(ncs[index + 2] / 4);
+                        let cardP4 = Math.floor(ncs[index + 3] / 4);
+                        if (cardP1 != cardP2 || cardP1 != cardP3 || cardP1 != cardP4)
+                            return 0
+
+                        index = (i + 1) * 4;
+                        // 比较 i + 1 对牌是否为对子
+                        let cardN1 = Math.floor(ncs[index] / 4);
+                        let cardN2 = Math.floor(ncs[index + 1] / 4);
+                        let cardN3 = Math.floor(ncs[index + 2] / 4);
+                        let cardN4 = Math.floor(ncs[index + 3] / 4);
+                        if (cardN1 != cardN2 || cardN1 != cardN3 || cardN1 != cardN4)
+                            return 0
+
+                        // 比较 i 对和 i+1 对是否连续
+                        if (cardN1 - cardP1 != 1)
+                            return 0;
+                    }
+                    return this.unAbsoluteCard(ncs[0]);
+                }
+            }
+            return 0
+        }
+
+        /**
          * 是不是飞机-六带四
          * @param cards 
          * @returns 0 - 不是飞机-六带四,abs - 飞机-六带四起始牌值(比如3334445566,返回3,用于比较大小)
@@ -411,21 +453,24 @@ module DDZ {
             let card10 = Math.floor(ncs[9] / 4);
 
             // 555666-7788
-            if (card1 == card3
+            if (card7 == card8 && card9 == card10
+                && card1 == card3
                 && card4 == card6
-                && card7 == card8 && card9 == card10) {
+                && card4 - card1 == 1) {
                 return this.unAbsoluteCard(ncs[0]);
             }
             // 3344-555666
             else if (card1 == card2 && card3 == card4
                 && card5 == card7
-                && card8 == card10) {
+                && card8 == card10
+                && card8 - card5 == 1) {
                 return this.unAbsoluteCard(ncs[4]);
             }
             // 33-555666-77
             else if (card1 == card2 && card9 == card10
                 && card3 == card5
-                && card6 == card8) {
+                && card6 == card8
+                && card6 - card3 == 1) {
                 return this.unAbsoluteCard(ncs[2]);
             }
             return 0;
@@ -453,18 +498,425 @@ module DDZ {
             let card8 = Math.floor(ncs[7] / 4);
 
             // 555666-78
-            if (card1 == card3 && card4 == card6) {
+            if (card1 == card3 && card4 == card6
+                && card4 - card1 == 1) {
                 return this.unAbsoluteCard(ncs[0]);
             }
             // 34-555666
-            else if (card3 == card5 && card6 == card8) {
+            else if (card3 == card5 && card6 == card8
+                && card6 - card3 == 1) {
                 return this.unAbsoluteCard(ncs[2]);
             }
             // 3-555666-7
-            else if (card2 == card4 && card5 == card7) {
+            else if (card2 == card4 && card5 == card7
+                && card5 - card2 == 1) {
                 return this.unAbsoluteCard(ncs[1]);
             }
             return 0;
+        }
+
+        /**
+         * 是不是飞机-九带六
+         * @param cards 
+         * @returns 0 - 不是飞机-九带六,abs - 飞机-九带六起始牌值(比如333444555667788,返回3,用于比较大小)
+         */
+        public static isPlaneNineSix(cards: Array<number>): number {
+            if (cards.length != 15)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[12] / 4);
+            let card14 = Math.floor(ncs[13] / 4);
+            let card15 = Math.floor(ncs[14] / 4);
+
+            // 555666777-8899JJ
+            if (card10 == card11 && card12 == card13 && card14 == card15
+                && card1 == card3
+                && card4 == card6
+                && card7 == card9
+                && card4 - card1 == 1 && card7 - card4 == 1) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 33-555666777-8899
+            else if (card1 == card2 && card12 == card13 && card14 == card15
+                && card3 == card5
+                && card6 == card8
+                && card9 == card11
+                && card6 - card3 == 1 && card9 - card6 == 1) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            // 3344-666777888-99
+            else if (card1 == card2 && card3 == card4 && card14 == card15
+                && card5 == card7
+                && card8 == card10
+                && card11 == card13
+                && card8 - card5 == 1 && card11 - card8 == 1) {
+                return this.unAbsoluteCard(ncs[4]);
+            }
+            // 334455-666777888
+            else if (card1 == card2 && card3 == card4 && card5 == card6
+                && card7 == card9
+                && card10 == card12
+                && card13 == card15
+                && card10 - card7 == 1 && card13 - card10 == 1) {
+                return this.unAbsoluteCard(ncs[6]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是飞机-九带三
+         * @param cards 
+         * @returns 0 - 不是飞机-九带三,abs - 飞机-九带三起始牌值(比如333444555678,返回3,用于比较大小)
+         */
+        public static isPlaneNineThree(cards: Array<number>): number {
+            if (cards.length != 12)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+
+            // 555666777-89J
+            if (card1 == card3 && card4 == card6 && card7 == card9
+                && card4 - card1 == 1 && card7 - card4 == 1) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 3-555666777-89
+            else if (card2 == card3 && card5 == card7 && card8 == card10
+                && card5 - card2 == 1 && card8 - card5 == 1) {
+                return this.unAbsoluteCard(ncs[1]);
+            }
+            // 34-555666777-8
+            else if (card3 == card5 && card6 == card8 && card9 == card11
+                && card6 - card3 == 1 && card9 - card6 == 1) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            // 344-555666777
+            else if (card4 == card6 && card7 == card9 && card10 == card12
+                && card7 - card4 == 1 && card10 - card7 == 1) {
+                return this.unAbsoluteCard(ncs[3]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是四带四
+         * @param cards 
+         * @returns 0 - 不是四带四,abs - 四带四起始牌值(比如33334455,返回3,用于比较大小)
+         */
+        public static isFourFour(cards: Array<number>): number {
+            if (cards.length != 8)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+
+            // 5555-6677
+            if (card1 == card4 && card5 == card6 && card7 == card8) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 33-5555-77
+            else if (card3 == card6 && card1 == card2 && card7 == card8) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            // 3344-5555
+            else if (card5 == card8 && card1 == card2 && card3 == card4) {
+                return this.unAbsoluteCard(ncs[4]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是四带二
+         * @param cards 
+         * @returns 0 - 不是四带二,abs - 四带二起始牌值(比如555567,返回5,用于比较大小)
+         */
+        public static isFourTwo(cards: Array<number>): number {
+            if (cards.length != 6)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+
+            // 5555-67
+            if (card1 == card4) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 4-5555-6
+            else if (card2 == card5) {
+                return this.unAbsoluteCard(ncs[1]);
+            }
+            // 34-5555
+            else if (card3 == card6) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是十二带四
+         * @param cards 
+         * @returns 0 - 不是十二带四,abs - 十二带四起始牌值(比如5556667778889JQK,返回5,用于比较大小)
+         */
+        public static isTwelveFour(cards: Array<number>): number {
+            if (cards.length != 16)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[11] / 4);
+            let card14 = Math.floor(ncs[11] / 4);
+            let card15 = Math.floor(ncs[11] / 4);
+            let card16 = Math.floor(ncs[11] / 4);
+
+            // 555666777888-9JQK
+            if (card1 == card3
+                && card4 == card6
+                && card7 == card9
+                && card10 == card12
+                && card4 - card1 == 1
+                && card7 - card4 == 1
+                && card10 - card7 == 1) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 4-555666777888-JQK
+            else if (card2 == card4
+                && card5 == card7
+                && card8 == card10
+                && card11 == card13
+                && card5 - card2 == 1
+                && card8 - card5 == 1
+                && card11 - card8 == 1) {
+                return this.unAbsoluteCard(ncs[1]);
+            }
+            // 44-555666777888-QK
+            else if (card3 == card5
+                && card6 == card8
+                && card9 == card11
+                && card12 == card13
+                && card6 - card3 == 1
+                && card9 - card6 == 1
+                && card12 - card9 == 1) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            // 344-555666777888-K
+            else if (card4 == card6
+                && card7 == card9
+                && card10 == card12
+                && card13 == card15
+                && card7 - card4 == 1
+                && card10 - card7 == 1
+                && card13 - card10 == 1) {
+                return this.unAbsoluteCard(ncs[3]);
+            }
+            // 3344-555666777888
+            else if (card5 == card7
+                && card8 == card10
+                && card11 == card13
+                && card14 == card16
+                && card8 - card5 == 1
+                && card11 - card8 == 1
+                && card14 - card11 == 1) {
+                return this.unAbsoluteCard(ncs[4]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是十二带八
+         * @param cards 
+         * @returns 0 - 不是十二带八,abs - 十二带八起始牌值(比如55566677788899JJQQKK,返回5,用于比较大小)
+         */
+        public static isTwelveEight(cards: Array<number>): number {
+            if (cards.length != 20)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[11] / 4);
+            let card14 = Math.floor(ncs[11] / 4);
+            let card15 = Math.floor(ncs[11] / 4);
+            let card16 = Math.floor(ncs[11] / 4);
+            let card17 = Math.floor(ncs[11] / 4);
+            let card18 = Math.floor(ncs[11] / 4);
+            let card19 = Math.floor(ncs[11] / 4);
+            let card20 = Math.floor(ncs[11] / 4);
+
+            // 555666777888-99JJQQKK
+            if (card1 == card3
+                && card4 == card6
+                && card7 == card9
+                && card10 == card12
+                && card4 - card1 == 1
+                && card7 - card4 == 1
+                && card10 - card7 == 1
+                && card13 == card14
+                && card15 == card16
+                && card17 == card18
+                && card19 == card20) {
+                return this.unAbsoluteCard(ncs[0]);
+            }
+            // 44-555666777888-JJQQKK
+            else if (card3 == card5
+                && card6 == card8
+                && card9 == card11
+                && card12 == card14
+                && card6 - card3 == 1
+                && card9 - card6 == 1
+                && card12 - card9 == 1
+                && card1 == card2
+                && card15 == card16
+                && card17 == card18
+                && card19 == card20) {
+                return this.unAbsoluteCard(ncs[2]);
+            }
+            // 3344-555666777888-QQKK
+            else if (card5 == card7
+                && card8 == card10
+                && card11 == card13
+                && card14 == card16
+                && card8 - card5 == 1
+                && card11 - card8 == 1
+                && card14 - card11 == 1
+                && card1 == card2
+                && card3 == card4
+                && card17 == card18
+                && card19 == card20) {
+                return this.unAbsoluteCard(ncs[4]);
+            }
+            // 333344-555666777888-KK
+            else if (card7 == card9
+                && card10 == card12
+                && card13 == card15
+                && card16 == card18
+                && card10 - card7 == 1
+                && card13 - card10 == 1
+                && card16 - card13 == 1
+                && card1 == card2
+                && card3 == card4
+                && card5 == card6
+                && card19 == card20) {
+                return this.unAbsoluteCard(ncs[6]);
+            }
+            // 33334444-555666777888
+            else if (card9 == card11
+                && card12 == card14
+                && card15 == card17
+                && card18 == card20
+                && card12 - card9 == 1
+                && card15 - card12 == 1
+                && card18 - card15 == 1
+                && card1 == card2
+                && card3 == card4
+                && card5 == card6
+                && card7 == card8) {
+                return this.unAbsoluteCard(ncs[8]);
+            }
+            return 0;
+        }
+
+        /**
+         * 是不是十五带五
+         * @param cards 
+         * @returns 0 - 不是十五带五,abs - 十五带五起始牌值(比如55566677788899JJQQKK,返回5,用于比较大小)
+         */
+        public static isFifteenFive(cards: Array<number>): number {
+            if (cards.length != 20)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[11] / 4);
+            let card14 = Math.floor(ncs[11] / 4);
+            let card15 = Math.floor(ncs[11] / 4);
+            let card16 = Math.floor(ncs[11] / 4);
+            let card17 = Math.floor(ncs[11] / 4);
+            let card18 = Math.floor(ncs[11] / 4);
+            let card19 = Math.floor(ncs[11] / 4);
+            let card20 = Math.floor(ncs[11] / 4);
+            
         }
 
         /**

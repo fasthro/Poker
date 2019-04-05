@@ -4,9 +4,10 @@
  * @Date: 2019-04-03 10:37:41
  */
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property, menu } = cc._decorator;
 
 @ccclass
+@menu("Game/Card")
 export default class Card extends cc.Component {
     // icon
     private _iconSprite: cc.Sprite = null;

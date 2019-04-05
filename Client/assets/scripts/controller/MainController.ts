@@ -9,9 +9,6 @@ import MainView from "../view/MainView";
  * @Date: 2019-03-28 11:11:56
  */
 
-const { ccclass, property } = cc._decorator;
-
-@ccclass
 export default class MainCtroller extends BaseController {
     // view
     private m_view: MainView = null;

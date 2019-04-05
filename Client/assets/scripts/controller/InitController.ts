@@ -13,9 +13,6 @@ import { ControllerType } from "../define/Controllers";
  * @Date: 2019-03-28 18:48:01
  */
 
-const { ccclass, property } = cc._decorator;
-
-@ccclass
 export default class InitController extends BaseController {
     // view
     private m_view: LaunchView = null;

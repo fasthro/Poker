@@ -9,9 +9,6 @@ import { UILayer } from "../define/UILayer";
  * @Date: 2019-03-28 14:56:48
  */
 
-const { ccclass, property } = cc._decorator;
-
-@ccclass
 export default class LoadingController extends BaseController implements IController {
     // view
     private m_view: LoadingView = null;

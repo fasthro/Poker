@@ -6,9 +6,10 @@ import Card from "./Card";
  * @Date: 2019-04-02 11:19:07
  */
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property, menu } = cc._decorator;
 
 @ccclass
+@menu("Game/Cards")
 export default class Cards extends cc.Component {
     // 图集
     @property(cc.SpriteAtlas)

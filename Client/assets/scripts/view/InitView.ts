@@ -4,9 +4,10 @@
  * @Date: 2019-03-28 18:47:22
  */
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property, menu } = cc._decorator;
 
 @ccclass
+@menu("View/InitView")
 export default class InitView extends cc.Component {
     // 进度条
     @property(cc.ProgressBar)

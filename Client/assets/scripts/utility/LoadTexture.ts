@@ -8,9 +8,10 @@ import { ManagerType } from "../define/Managers";
  * @Date: 2019-03-27 18:02:29
  */
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property, menu } = cc._decorator;
 
 @ccclass
+@menu("工具/LoadTexture")
 export default class LoadTexture extends cc.Component {
 
     // 图片地址

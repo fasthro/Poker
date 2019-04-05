@@ -6,9 +6,6 @@ import { UILayer } from "../define/UILayer";
  * @Date: 2019-03-28 11:11:56
  */
 
-const { ccclass, property } = cc._decorator;
-
-@ccclass
 export default class BaseController implements IController {
     // 物体节点
     public gameObject: cc.Node = null;

@@ -21,7 +21,7 @@ export default class DDZHeadCom extends cc.Component {
     /**
      * 初始化
      */
-    public initHead(): void {
+    public init(): void {
         // TODO
         // this.head.spriteFrame = null;
         this.score.string = "0";

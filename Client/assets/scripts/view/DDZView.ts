@@ -1,5 +1,6 @@
 import DDZHeadCom from "../game/ddz/component/DDZHeadCom";
 import Cards from "../game/Cards";
+import DDZMessageCom from "../game/ddz/component/DDZMessageCom";
 
 /*
  * @Author: fasthro
@@ -25,7 +26,17 @@ export default class DDZView extends cc.Component {
     @property(DDZHeadCom)
     public headZ: DDZHeadCom = null;
 
-    // 操作按钮
+    // 消息
+    @property(DDZMessageCom)
+    public messageX: DDZMessageCom = null;
+    @property(DDZMessageCom)
+    public messageY: DDZMessageCom = null;
+    @property(DDZMessageCom)
+    public messageZ: DDZMessageCom = null;
+
+    // 操作node
+    @property(cc.Node)
+    public operateNode: cc.Node = null;
     // 不出
     @property(cc.Button)
     public btnPass: cc.Button = null;
@@ -36,31 +47,101 @@ export default class DDZView extends cc.Component {
     @property(cc.Button)
     public btnDiscard: cc.Button = null;
 
-    onLoad() {
-        // 牌组件
-        if (!this.cards) this.cards = this.node.getChildByName("cards").getComponent(Cards);
-
-        // 头像
-        if (!this.headX) this.headX = this.node.getChildByName("head_x").getComponent(DDZHeadCom);
-        if (!this.headY) this.headY = this.node.getChildByName("head_y").getComponent(DDZHeadCom);
-        if (!this.headZ) this.headZ = this.node.getChildByName("head_z").getComponent(DDZHeadCom);
-
-        // 操作按钮
-        if (!this.btnPass) this.btnPass = this.node.getChildByName("btn_pass").getComponent(cc.Button);
-        if (!this.btnHint) this.btnHint = this.node.getChildByName("btn_hint").getComponent(cc.Button);
-        if (!this.btnDiscard) this.btnDiscard = this.node.getChildByName("btn_discard").getComponent(cc.Button);
-    }
+    // 抢地主node
+    @property(cc.Node)
+    public grabLandlordNode: cc.Node = null;
+    // 不叫
+    @property(cc.Button)
+    public btnUnGrab: cc.Button = null;
+    // 一分
+    @property(cc.Button)
+    public btnScore1: cc.Button = null;
+    // 二分
+    @property(cc.Button)
+    public btnScore2: cc.Button = null;
+    // 三分
+    @property(cc.Button)
+    public btnScore3: cc.Button = null;
 
     /**
      * 初始化 view
      */
     public initView(): void {
         this.cards.initCards([]);
-        this.headX.initHead();
-        this.headY.initHead();
-        this.headZ.initHead();
-        this.btnPass.node.active = false;
-        this.btnHint.node.active = false;
-        this.btnDiscard.node.active = false;
+        this.headX.init();
+        this.headY.init();
+        this.headZ.init();
+
+        this.messageX.init();
+        this.messageY.init();
+        this.messageZ.init();
+
+        this.operateNode.active = false;
+        this.grabLandlordNode.active = false;
     }
+
+    /**
+     * 设置 PlayerX 开始抢地主
+     */
+    public setStartGrabLandlordX(): void {
+
+    }
+
+    /**
+     * 设置 PlayerY 开始抢地主
+     */
+    public setStartGrabLandlordY(): void {
+
+    }
+
+    /**
+     * 设置 PlayerZ 开始抢地主
+     * @param minScore 最小可抢分数
+     */
+    public setStartGrabLandlordZ(minScore: number): void {
+        this.grabLandlordNode.active = true;
+        this.btnScore1.enabled = minScore <= 1;
+        this.btnScore2.enabled = minScore <= 2;
+        this.btnScore3.enabled = minScore <= 3;
+    }
+
+    /**
+     * 设置 PlayerX 抢地主
+     * @param score 抢的分数
+     */
+    public setGrabLandlordX(score: number): void {
+        if (score > 0) {
+            this.messageX.setScore(score);
+        }
+        else {
+            this.messageX.setPopup("不叫");
+        }
+    }
+
+    /**
+     * 设置 PlayerY 抢地主
+     * @param score 抢的分数
+     */
+    public setGrabLandlordY(score: number): void {
+        if (score > 0) {
+            this.messageY.setScore(score);
+        }
+        else {
+            this.messageY.setPopup("不叫");
+        }
+    }
+
+    /**
+     * 设置 PlayerZ 抢地主
+     * @param score 抢的分数
+     */
+    public setGrabLandlordZ(score: number): void {
+        if (score > 0) {
+            this.messageZ.setScore(score);
+        }
+        else {
+            this.messageZ.setPopup("不叫");
+        }
+    }
+
 }

@@ -31,6 +31,10 @@ export default class Cards extends cc.Component {
     @property(cc.Integer)
     public cardDequeueSpace: number = 60;
 
+    // 是否可操作
+    @property(cc.Boolean)
+    public touchEnabled: boolean = true;
+
     // 伸展方式 0 中心向两侧, -1 向左, 1 向右
     private _stretch: number = 0;
 
@@ -40,10 +44,6 @@ export default class Cards extends cc.Component {
     // touch
     private _touchEvent: cc.Touch;
 
-    onLoad(): void {
-        // this.initCards([2, 3, 4, 5, 6, 7, 8, 9, 10], -1);
-    }
-
     /**
      * 初始化牌
      * @param cards 牌数组
@@ -51,11 +51,24 @@ export default class Cards extends cc.Component {
      */
     public initCards(cIds: number[], stretch: number = 0): void {
         this._stretch = stretch;
-        this._cards = [];
 
+        let rCount = this._cards.length - cIds.length;
+        if (rCount > 0) {
+            for (let i = 0; i < rCount; i++) {
+                this._cards[0].destroy();
+                this._cards.splice(0, 1);
+            }
+        }
+
+        let ocount = this._cards.length;
         let count = cIds.length;
         for (let i = 0; i < count; i++) {
-            this._cards.push(this.createCard(cIds[i], i, count));
+            if (i < ocount) {
+                this.resetCard(this._cards[i], cIds[i], i, count);
+            }
+            else {
+                this._cards.push(this.createCard(cIds[i], i, count));
+            }
         }
     }
 
@@ -74,6 +87,22 @@ export default class Cards extends cc.Component {
         let card = this.createCard(id, index, this._cards.length + 1);
         card.node.setSiblingIndex(index);
         this._cards.splice(index, 0, card);
+        this.updatePosition();
+    }
+
+    /**
+     * 指定牌出队
+     * @param cards 
+     */
+    public dequeueCards(cards: number[]): void {
+        for (let k = 0; k < cards.length; k++) {
+            for (let i = 0; i < this._cards.length; i++) {
+                if (this._cards[i].cId == cards[k]) {
+                    this._cards[i].isDequeue = true;
+                    break
+                }
+            }
+        }
         this.updatePosition();
     }
 
@@ -101,29 +130,45 @@ export default class Cards extends cc.Component {
      */
     private createCard(cId: number, index: number, total: number): Card {
         let cardNode: cc.Node = cc.instantiate(this.cardPrefab);
-        cardNode.name = cId.toString();
         this.node.addChild(cardNode);
-        cardNode.setPosition(this.getCardPosition(index, total, false));
-
         let card: Card = cardNode.getComponent("Card");
-
-        // click
-        let clickHandler = new cc.Component.EventHandler();
-        clickHandler.component = "Cards";
-        clickHandler.target = this.node;
-        clickHandler.handler = "onCardClick";
-        clickHandler.customEventData = index.toString();
-
-        // touch event
-        cardNode.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
-        cardNode.on(cc.Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
-        cardNode.on(cc.Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
-        cardNode.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
-
-        // init
-        card.initCard(cId, this.atlas, clickHandler);
-
+        this.resetCard(card, cId, index, total);
         return card;
+    }
+
+    /**
+     * 重置card
+     * @param card 
+     * @param cId 
+     * @param index 
+     * @param total 
+     */
+    private resetCard(card: Card, cId: number, index: number, total: number): void {
+        card.node.name = cId.toString();
+        card.node.setPosition(this.getCardPosition(index, total, false));
+        card.node.setSiblingIndex(index);
+
+        if (this.touchEnabled) {
+            // click
+            let clickHandler = new cc.Component.EventHandler();
+            clickHandler.component = "Cards";
+            clickHandler.target = this.node;
+            clickHandler.handler = "onCardClick";
+            clickHandler.customEventData = index.toString();
+
+            // touch event
+            card.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
+            card.node.on(cc.Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
+            card.node.on(cc.Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
+            card.node.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
+
+            // init
+            card.initCard(cId, this.cardSize, this.atlas, clickHandler);
+        }
+        else {
+            // init
+            card.initCard(cId, this.cardSize, this.atlas, null);
+        }
     }
 
     /**

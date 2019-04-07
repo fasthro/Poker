@@ -12,19 +12,24 @@ export default class DDZHeadCom extends cc.Component {
 
     // 头像 Sprite
     @property(cc.Sprite)
-    public head: cc.Sprite = null;
+    public headSprite: cc.Sprite = null;
 
     // 积分文本框
     @property(cc.Label)
-    public score: cc.Label = null;
+    public scoreLabel: cc.Label = null;
+
+    // 地主标识
+    @property(cc.Node)
+    public dzNode: cc.Node = null;
 
     /**
      * 初始化
      */
     public init(): void {
         // TODO
-        // this.head.spriteFrame = null;
-        this.score.string = "0";
+        // this.headSprite.spriteFrame = null;
+        this.scoreLabel.string = "0";
+        this.dzNode.active = false;
     }
 
     /**
@@ -40,6 +45,13 @@ export default class DDZHeadCom extends cc.Component {
      * @param score 
      */
     public setScore(score: number): void {
-        this.score.string = score.toString();
+        this.scoreLabel.string = score.toString();
+    }
+
+    /**
+     * 设置地主
+     */
+    public setDZ(): void {
+        this.dzNode.active = true;
     }
 }

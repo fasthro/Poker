@@ -73,6 +73,7 @@ module DDZ {
         public static sortNormal(cards: Array<number>): Array<number> {
             let ncs = this.absoluteCards(cards);
             ncs.sort();
+            ncs.reverse();
             return this.unAbsoluteCards(ncs);
         }
 
@@ -86,7 +87,6 @@ module DDZ {
             let ncs = this.absoluteCards(cards);
             ncs.sort();
             ncs.reverse();
-            console.log(ncs);
             let newCards: Array<number> = [];
 
             let index: number = 0;
@@ -908,14 +908,14 @@ module DDZ {
             let card10 = Math.floor(ncs[9] / 4);
             let card11 = Math.floor(ncs[10] / 4);
             let card12 = Math.floor(ncs[11] / 4);
-            let card13 = Math.floor(ncs[11] / 4);
-            let card14 = Math.floor(ncs[11] / 4);
-            let card15 = Math.floor(ncs[11] / 4);
-            let card16 = Math.floor(ncs[11] / 4);
-            let card17 = Math.floor(ncs[11] / 4);
-            let card18 = Math.floor(ncs[11] / 4);
-            let card19 = Math.floor(ncs[11] / 4);
-            let card20 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[12] / 4);
+            let card14 = Math.floor(ncs[13] / 4);
+            let card15 = Math.floor(ncs[14] / 4);
+            let card16 = Math.floor(ncs[15] / 4);
+            let card17 = Math.floor(ncs[16] / 4);
+            let card18 = Math.floor(ncs[17] / 4);
+            let card19 = Math.floor(ncs[18] / 4);
+            let card20 = Math.floor(ncs[19] / 4);
             
         }
 

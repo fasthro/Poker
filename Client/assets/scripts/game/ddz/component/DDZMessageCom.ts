@@ -13,22 +13,30 @@ export default class DDZMessageCom extends cc.Component {
     // 分数 node
     @property(cc.Node)
     public scoreNode: cc.Node = null;
-    // 一分
-    @property(cc.Node)
-    public score1: cc.Node = null;
-    // 二分
-    @property(cc.Node)
-    public score2: cc.Node = null;
-    // 三分
-    @property(cc.Node)
-    public score3: cc.Node = null;
+    // 分数文本
+    @property(cc.Label)
+    public scoreLabel: cc.Label = null;
 
     // 弹窗 node
     @property(cc.Node)
     public popupNode: cc.Node = null;
     // 消息文本
     @property(cc.Label)
-    public msg: cc.Label = null;
+    public popupLabel: cc.Label = null;
+
+    // 牌数 node
+    @property(cc.Node)
+    public cardCountNode: cc.Node = null;
+    // 牌数文本
+    @property(cc.Label)
+    public cardCountLabel: cc.Label = null;
+
+    // 倒计时 node
+    @property(cc.Node)
+    public countdownNode: cc.Node = null;
+    // 倒计时文本
+    @property(cc.Label)
+    public countdownLabel: cc.Label = null;
 
     /**
      * 初始化
@@ -36,6 +44,8 @@ export default class DDZMessageCom extends cc.Component {
     public init(): void {
         this.scoreNode.active = false;
         this.popupNode.active = false;
+        this.cardCountNode.active = false;
+        this.countdownNode.active = false;
     }
 
     /**
@@ -44,11 +54,7 @@ export default class DDZMessageCom extends cc.Component {
      */
     public setScore(score: number): void {
         this.scoreNode.active = true;
-        this.popupNode.active = false;
-
-        this.score1.active = score == 1;
-        this.score2.active = score == 2;
-        this.score3.active = score == 3;
+        this.scoreLabel.string = score.toString();
     }
 
     /**
@@ -56,9 +62,25 @@ export default class DDZMessageCom extends cc.Component {
      * @param msg 
      */
     public setPopup(msg: string): void {
-        this.scoreNode.active = false;
         this.popupNode.active = true;
+        this.popupLabel.string = msg;
+    }
 
-        this.msg.string = msg;
+    /**
+     * 设置牌数
+     * @param count 
+     */
+    public setCardCount(count: number): void {
+        this.cardCountNode.active = true;
+        this.cardCountLabel.string = count.toString();
+    }
+
+    /**
+     * 设置倒计时
+     * @param time 
+     */
+    public setCountdown(time: number): void {
+        this.cardCountNode.active = true;
+        this.countdownLabel.string = time.toString();
     }
 }

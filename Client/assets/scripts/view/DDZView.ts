@@ -1,6 +1,7 @@
 import DDZHeadCom from "../game/ddz/component/DDZHeadCom";
 import Cards from "../game/Cards";
 import DDZMessageCom from "../game/ddz/component/DDZMessageCom";
+import DDZCtroller from "../controller/DDZCtroller";
 
 /*
  * @Author: fasthro
@@ -13,10 +14,16 @@ const { ccclass, property, menu } = cc._decorator;
 @ccclass
 @menu("斗地主/View")
 export default class DDZView extends cc.Component {
+    // controller
+    private _controller: DDZCtroller;
 
     // 牌组件
     @property(Cards)
     public cards: Cards = null;
+
+    // 底牌牌组件
+    @property(Cards)
+    public wcards: Cards = null;
 
     // 头像
     @property(DDZHeadCom)
@@ -63,10 +70,20 @@ export default class DDZView extends cc.Component {
     @property(cc.Button)
     public btnScore3: cc.Button = null;
 
+    onLoad() {
+        // 注册抢地主按钮事件
+        this.btnUnGrab.clickEvents.push(this.createClickEventHandler("onClickGrab", "0"));
+        this.btnScore1.clickEvents.push(this.createClickEventHandler("onClickGrab", "1"));
+        this.btnScore2.clickEvents.push(this.createClickEventHandler("onClickGrab", "2"));
+        this.btnScore3.clickEvents.push(this.createClickEventHandler("onClickGrab", "3"));
+    }
+
     /**
      * 初始化 view
      */
-    public initView(): void {
+    public initView(controller: DDZCtroller): void {
+        this._controller = controller;
+
         this.cards.initCards([]);
         this.headX.init();
         this.headY.init();
@@ -84,14 +101,14 @@ export default class DDZView extends cc.Component {
      * 设置 PlayerX 开始抢地主
      */
     public setStartGrabLandlordX(): void {
-
+        this.grabLandlordNode.active = false;
     }
 
     /**
      * 设置 PlayerY 开始抢地主
      */
     public setStartGrabLandlordY(): void {
-
+        this.grabLandlordNode.active = false;
     }
 
     /**
@@ -100,9 +117,9 @@ export default class DDZView extends cc.Component {
      */
     public setStartGrabLandlordZ(minScore: number): void {
         this.grabLandlordNode.active = true;
-        this.btnScore1.enabled = minScore <= 1;
-        this.btnScore2.enabled = minScore <= 2;
-        this.btnScore3.enabled = minScore <= 3;
+        this.btnScore1.interactable = minScore <= 1;
+        this.btnScore2.interactable = minScore <= 2;
+        this.btnScore3.interactable = minScore <= 3;
     }
 
     /**
@@ -144,4 +161,71 @@ export default class DDZView extends cc.Component {
         }
     }
 
+    /**
+     * 设置 PlayerX 为地主
+     */
+    public setLandlordX(): void {
+        this.grabLandlordNode.active = false;
+        this.headX.setDZ();
+
+        this.messageX.init();
+        this.messageY.init();
+        this.messageZ.init();
+    }
+
+    /**
+     * 设置 PlayerY 为地主
+     */
+    public setLandlordY(): void {
+        this.grabLandlordNode.active = false;
+        this.headY.setDZ();
+
+        this.messageX.init();
+        this.messageY.init();
+        this.messageZ.init();
+    }
+
+    /**
+     * 设置 PlayerZ 为地主
+     */
+    public setLandlordZ(): void {
+        this.grabLandlordNode.active = false;
+        this.headZ.setDZ();
+
+        this.messageX.init();
+        this.messageY.init();
+        this.messageZ.init();
+    }
+
+    /**
+     * 设置底牌
+     * @param cards 
+     */
+    public setWcard(cards: Array<number>): void {
+        this.wcards.initCards(cards);
+    }
+
+    /**
+     * 抢地主按钮事件
+     * @param event 
+     * @param customEventData 
+     */
+    private onClickGrab(event, customEventData): void {
+        let score: number = parseInt(customEventData);
+        this._controller.onClickGrab(score);
+    }
+
+    /**
+     * 创建点击事件
+     * @param handler 
+     * @param customEventData 
+     */
+    private createClickEventHandler(handler: string, customEventData: string) {
+        var clickEventHandler = new cc.Component.EventHandler();
+        clickEventHandler.target = this.node;
+        clickEventHandler.component = "DDZView";
+        clickEventHandler.handler = handler;
+        clickEventHandler.customEventData = customEventData;
+        return clickEventHandler
+    }
 }

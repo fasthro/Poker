@@ -1,14 +1,14 @@
 /*
  * @Author: fasthro
- * @Description: 斗地主牌桌消息组件
+ * @Description: 斗地主牌桌行为组件
  * @Date: 2019-04-05 22:44:10
  */
 
 const { ccclass, property, menu } = cc._decorator;
 
 @ccclass
-@menu("斗地主/MessageCom")
-export default class DDZMessageCom extends cc.Component {
+@menu("斗地主/BehaviorCom")
+export default class DDZBehaviorCom extends cc.Component {
 
     // 分数 node
     @property(cc.Node)
@@ -42,45 +42,45 @@ export default class DDZMessageCom extends cc.Component {
      * 初始化
      */
     public init(): void {
-        this.scoreNode.active = false;
-        this.popupNode.active = false;
-        this.cardCountNode.active = false;
-        this.countdownNode.active = false;
+        this.setScore(false);
+        this.setBehavior(false);
+        this.setCardCount(false);
+        this.setCountdown(false);
     }
 
     /**
      * 设置分数显示
      * @param score 
      */
-    public setScore(score: number): void {
-        this.scoreNode.active = true;
-        this.scoreLabel.string = score.toString();
+    public setScore(active: boolean, score?: number): void {
+        this.scoreNode.active = active;
+        if (score) this.scoreLabel.string = score.toString();
     }
 
     /**
-     * 设置弹窗内容
+     * 设置行为提示
      * @param msg 
      */
-    public setPopup(msg: string): void {
-        this.popupNode.active = true;
-        this.popupLabel.string = msg;
+    public setBehavior(active: boolean, msg?: string): void {
+        this.popupNode.active = active;
+        if (msg) this.popupLabel.string = msg;
     }
 
     /**
      * 设置牌数
      * @param count 
      */
-    public setCardCount(count: number): void {
-        this.cardCountNode.active = true;
-        this.cardCountLabel.string = count.toString();
+    public setCardCount(active: boolean, count?: number): void {
+        this.cardCountNode.active = active;
+        if (count) this.cardCountLabel.string = count.toString();
     }
 
     /**
      * 设置倒计时
      * @param time 
      */
-    public setCountdown(time: number): void {
-        this.cardCountNode.active = true;
-        this.countdownLabel.string = time.toString();
+    public setCountdown(active: boolean, time?: number): void {
+        this.countdownNode.active = active;
+        if (time) this.countdownLabel.string = time.toString();
     }
 }

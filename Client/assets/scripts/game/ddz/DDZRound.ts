@@ -11,10 +11,23 @@ import DDZ = require("./DDZ");
  */
 export class DDZEventData {
     public player?: DDZPlayer;          // 事件执行玩家
-    public cards?: Array<number>;       // 牌
+    public cards?: Array<number>;       // 手中牌
     public wcards?: Array<number>;      // 底牌
-    public minScore?: number;           // 抢地主最小可抢分数
-    public grabScore?: number;          // 抢地主抢的分数
+    public ocards?: Array<number>;      // 对手出的牌
+    public dcards?: Array<number>;      // 自己出的牌
+    public minScore?: number;           // 可选择的最小分数
+    public choiceScore?: number;        // 最终选择的分数
+
+    tostring(): string {
+        return `
+        player:${this.player.name} 
+        cards:${this.cards ? this.cards : "null"} 
+        wcards:${this.wcards ? this.wcards : "null"} 
+        ocards:${this.ocards ? this.ocards : "null"}
+        dcards:${this.dcards ? this.dcards : "null"}
+        dcards:${this.minScore ? this.minScore : "null"}
+        dcards:${this.choiceScore ? this.choiceScore : "null"}`
+    }
 }
 
 /**
@@ -45,10 +58,10 @@ export class DDZPlayer {
     private readonly _head: string = "";
     public get head(): string { return this._head; }
 
-    // 玩家积分
-    private _score: number = 0;
-    public get score(): number { return this._score; }
-    public set score(value) { this._score = value; }
+    // 玩家代币
+    private _coin: number = 0;
+    public get coin(): number { return this._coin; }
+    public set coin(value) { this._coin = value; }
 
     // 是否为地主
     private _landlord: boolean = false;
@@ -69,19 +82,19 @@ export class DDZPlayer {
     private _wcards: Array<number> = [];
     public get wcards(): Array<number> { return this._wcards; }
 
-    // 本轮出的牌
-    private _discards: Array<number> = [];
-    public get discards(): Array<number> { return this._discards; }
-    public set discards(value) { this._discards = value; }
-
-    // 抢地主分数
-    private _grabScore: number = 0;
-    public get grabScore(): number { return this._grabScore; }
+    // 出的牌
+    private _dcards: Array<number> = [];
+    public get dcards(): Array<number> { return this._dcards; }
+    public set dcards(value) { this._dcards = value; }
 
     // 上一轮出的牌
-    private _preDiscards: Array<number> = [];
-    public get preDiscards(): Array<number> { return this._preDiscards; }
-    public set preDiscards(value) { this._preDiscards = value; }
+    private _pcards: Array<number> = [];
+    public get pcards(): Array<number> { return this._pcards; }
+    public set pcards(value) { this._pcards = value; }
+
+    // 选择的分数
+    private _score: number = 0;
+    public get score(): number { return this._score; }
 
     // 是否为操作方
     private _owner: boolean = false;
@@ -92,12 +105,16 @@ export class DDZPlayer {
     public readyEvent: DDZEvent = null;
     // 发牌
     public dealEvent: DDZEvent = null;
-    // 开始抢地主
-    public startGrabEvent: DDZEvent = null;
-    // 抢地主
-    public grabEvent: DDZEvent = null;
-    // 设置地主
-    public setLandlordEvent: DDZEvent = null;
+    // 选择分数
+    public choiceScoreEvent: DDZEvent = null;
+    // 执行选择分数
+    public executeChoiceScoreEvent: DDZEvent = null;
+    // 产生地主
+    public createLordEvent: DDZEvent = null;
+    // 选择牌
+    public choiceCardEvent: DDZEvent = null;
+    // 执行选择出牌
+    public executeChoiceCardEvent: DDZEvent = null;
 
     /**
      * 构造方法
@@ -110,11 +127,12 @@ export class DDZPlayer {
         this._name = name;
         this._head = head;
 
-        this._score = 0;
+        this._coin = 0;
         this._landlord = false;
         this._cards = [];
-        this.discards = [];
-        this.preDiscards = [];
+        this._wcards = [];
+        this._dcards = [];
+        this._pcards = [];
     }
 
     /**
@@ -122,7 +140,7 @@ export class DDZPlayer {
      */
     public ready(): void {
         if (this.owner) {
-            this.callEvent(this.readyEvent);
+            this._callEvent(this.readyEvent);
         }
     }
 
@@ -135,19 +153,19 @@ export class DDZPlayer {
         if (this.owner) {
             let data: DDZEventData = new DDZEventData();
             data.cards = this.cards;
-            this.callEvent(this.dealEvent, data);
+            this._callEvent(this.dealEvent, data);
         }
     }
 
     /**
-     * 开始抢地主
-     * @param target 可抢最小分数
+     * 选择分数
+     * @param minScore 可选择的最小分数
      */
-    public startGrabLandlord(minScore: number): void {
+    public choiceScore(minScore: number): void {
         let data: DDZEventData = new DDZEventData();
         data.player = this;
         data.minScore = minScore;
-        this.callEvent(this.startGrabEvent, data);
+        this._callEvent(this.choiceScoreEvent, data);
 
         // 托管随机抢
         if (this.agent) {
@@ -155,30 +173,28 @@ export class DDZPlayer {
             for (let i = 1; i < 4; i++) {
                 if (i > minScore) alternative.push(i);
             }
-            this._round.grab(this, alternative[DDZ.Utils.random(0, alternative.length - 1)]);
+            this._round.executeChoiceScore(this, alternative[DDZ.Utils.random(0, alternative.length - 1)]);
         }
     }
 
     /**
-     * 抢地主
-     * @param target 目标玩家
-     * @param grabScore 抢的分数 0 - 不抢
+     * 确认选择的分数
+     * @param score 抢的分数 0 - 不抢
      */
-    public grabLandlord(grabScore: number): void {
-        console.log(`${this.name} 抢 ${grabScore} 分`);
-        this._grabScore = grabScore;
+    public executeChoiceScore(score: number): void {
+        this._score = score;
 
         let data: DDZEventData = new DDZEventData();
         data.player = this;
-        data.grabScore = grabScore;
-        this.callEvent(this.grabEvent, data);
+        data.choiceScore = score;
+        this._callEvent(this.executeChoiceScoreEvent, data);
     }
 
     /**
-     * 设置为地主
+     * 产生地主
      * @param cards 底牌
      */
-    public setLandlord(wcards: Array<number>): void {
+    public createLord(wcards: Array<number>): void {
         this._wcards = wcards;
         for (let i = 0; i < wcards.length; i++) {
             this.cards.push(wcards[i]);
@@ -190,7 +206,34 @@ export class DDZPlayer {
         data.player = this;
         data.cards = this.cards;
         data.wcards = wcards;
-        this.callEvent(this.setLandlordEvent, data);
+        this._callEvent(this.createLordEvent, data);
+    }
+
+    /**
+     * 选择出牌
+     * @param cards 
+     */
+    public choiceCard(cards: Array<number>): void {
+        let data: DDZEventData = new DDZEventData();
+        data.player = this;
+        data.ocards = cards;
+        this._callEvent(this.choiceCardEvent, data);
+
+        // 托管随机抢
+        if (this.agent) {
+            this._round.executeChoiceCard(this, []);
+        }
+    }
+
+    /**
+     * 执行选择出牌
+     * @param cards 要出去的牌
+     */
+    public executeChoiceCard(cards: Array<number>): void {
+        let data: DDZEventData = new DDZEventData();
+        data.player = this;
+        data.dcards = cards;
+        this._callEvent(this.executeChoiceCardEvent, data);
     }
 
     /**
@@ -198,13 +241,13 @@ export class DDZPlayer {
      * @param event 
      * @param data 
      */
-    private callEvent(event: DDZEvent, data?: DDZEventData): void {
+    private _callEvent(event: DDZEvent, data?: DDZEventData): void {
         if (event) {
             if (!data) {
                 data = new DDZEventData();
             }
             data.player = this;
-            console.log(`${this.name} event: ${event.name}`);
+            console.log(`${this.name} event: ${event.name} data:${data.tostring()}`);
             event.handler.call(event.context, data);
         }
     }
@@ -235,12 +278,9 @@ export class DDZRound {
     public get wcards(): Array<number> { return this._wcards; }
 
     // 本轮开始的玩家
-    private _startPlayer: DDZPlayer = null;
-    public get startPlayer(): DDZPlayer { return this._startPlayer; }
-
+    private _first: DDZPlayer = null;
     // 本轮当前进行的玩家
-    private _targetPlayer: DDZPlayer = null;
-    public get targetPlayer(): DDZPlayer { return this._startPlayer; }
+    private _current: DDZPlayer = null;
 
     /**
      * 初始化
@@ -249,16 +289,19 @@ export class DDZRound {
         // new player
         this._playerX = new DDZPlayer(this, 1, "x玩家", "");
         this._playerX.agent = true;
+        this._playerX.coin = 1000;
 
         this._playerY = new DDZPlayer(this, 2, "y玩家", "");
         this._playerY.agent = true;
+        this._playerY.coin = 2000;
 
         this._playerZ = new DDZPlayer(this, 3, "z玩家", "");
         this._playerZ.owner = true;
+        this._playerZ.coin = 3000;
 
         // 清空玩家
-        this._startPlayer = null;
-        this._targetPlayer = null;
+        this._first = null;
+        this._current = null;
     }
 
     /**
@@ -305,97 +348,151 @@ export class DDZRound {
         this._playerX.deal(cards.x);
         this._playerY.deal(cards.y);
         this._playerZ.deal(cards.z);
-        
-        // 开始抢地主
-        this.startGrab();
+
+        // 开始选择分数-随机玩家
+        this.choiceScore(this._randomPlayer(), 1);
     }
 
     /**
-     * 绑定开始抢地主事件
+     * 绑定选择分数事件
      * @param event 
      */
-    public bindStartGrabEvent(event: DDZEvent): void {
-        this._playerX.startGrabEvent = event;
-        this._playerY.startGrabEvent = event;
-        this._playerZ.startGrabEvent = event;
+    public bindChoiceScoreEvent(event: DDZEvent): void {
+        this._playerX.choiceScoreEvent = event;
+        this._playerY.choiceScoreEvent = event;
+        this._playerZ.choiceScoreEvent = event;
     }
 
     /**
-     * 开始抢地主
+     * 选择分数
      */
-    public startGrab(): void {
-        // 随机一名玩家
-        let player = this.randomPlayer();
-
-        // 设置进行操作的玩家
-        this._startPlayer = player;
-        this._targetPlayer = player;
+    public choiceScore(player: DDZPlayer, minScore: number): void {
+        this._first = player;
+        this._current = player;
 
         // 玩家开始抢
-        player.startGrabLandlord(1);
+        player.choiceScore(minScore);
     }
 
     /**
-     * 绑定抢地主事件
+     * 绑定执行选择分数事件
      * @param event 
      */
-    public bindGrab(event: DDZEvent): void {
-        this._playerX.grabEvent = event;
-        this._playerY.grabEvent = event;
-        this._playerZ.grabEvent = event;
+    public bindExecuteChoiceScoreEvent(event: DDZEvent): void {
+        this._playerX.executeChoiceScoreEvent = event;
+        this._playerY.executeChoiceScoreEvent = event;
+        this._playerZ.executeChoiceScoreEvent = event;
     }
 
     /**
-     * 执行抢地主
+     * 执行选择分数
      * @param score 
      */
-    public grab(player: DDZPlayer, score: number): void {
-        player.grabLandlord(score);
+    public executeChoiceScore(player: DDZPlayer, score: number): void {
+        player.executeChoiceScore(score);
 
-        // 抢到3分直接设置地主
+        // 选择3分直接产生地主
         if (score == 3) {
-            player.setLandlord(this.wcards)
+            this.createLord(player);
         }
         else {
             // 分数最高玩家
-            let highestScorePlayer: DDZPlayer = null;
-            if (this._playerX.grabScore >= this._playerY.grabScore && this._playerX.grabScore >= this._playerZ.grabScore) {
-                highestScorePlayer = this._playerX;
-            }
-            else if (this._playerY.grabScore >= this._playerX.grabScore && this._playerY.grabScore >= this._playerZ.grabScore) {
-                highestScorePlayer = this._playerY;
-            }
-            else {
-                highestScorePlayer = this._playerZ;
-            }
-            
-            let nextPlayer = this.nextPlayer(player);
+            let highestPlayer = this._highestScorePlayer();
+            // 下一个玩家
+            let nextPlayer = this._nextPlayer(player);
             // 全部抢完，找抢的最高分玩家，且设置成地主
-            if (this.isSamePlayer(this.startPlayer, nextPlayer)) {
-                player.setLandlord(this.wcards)
+            if (this._isSamePlayer(this._first, nextPlayer)) {
+                this.createLord(highestPlayer);
             }
-            // 继续下一个玩家抢地主
             else {
-                nextPlayer.startGrabLandlord(highestScorePlayer.grabScore + 1);
+                // 继续下一个玩家抢地主
+                nextPlayer.choiceScore(highestPlayer.score + 1);
             }
         }
     }
 
     /**
-     * 绑定抢地主事件
+     * 绑定产生地主事件
      * @param event 
      */
-    public bindSetLandlord(event: DDZEvent): void {
-        this._playerX.setLandlordEvent = event;
-        this._playerY.setLandlordEvent = event;
-        this._playerZ.setLandlordEvent = event;
+    public bindCreateLordEvent(event: DDZEvent): void {
+        this._playerX.createLordEvent = event;
+        this._playerY.createLordEvent = event;
+        this._playerZ.createLordEvent = event;
+    }
+
+    /**
+     * 产生地主
+     */
+    public createLord(player: DDZPlayer): void {
+        this._first = null;
+        this._current = null;
+
+        player.createLord(this.wcards)
+
+        // 先择出牌
+        this.choiceCard(player, []);
+    }
+
+    /**
+     * 绑定选择出牌
+     * @param event 
+     */
+    public bindChoiceCardEevnt(event: DDZEvent): void {
+        this._playerX.choiceCardEvent = event;
+        this._playerY.choiceCardEvent = event;
+        this._playerZ.choiceCardEvent = event;
+    }
+
+    /**
+     * 选择出牌
+     * @param player 操作玩家
+     * @param cards 需要镇压的牌
+     */
+    public choiceCard(player: DDZPlayer, cards: Array<number>): void {
+        if (!this._first) this._first = player;
+        this._current = player;
+
+        player.choiceCard(cards);
+    }
+
+    /**
+     * 绑定执行选择出牌
+     * @param event 
+     */
+    public bindExecuteChoiceCardEvent(event: DDZEvent): void {
+        this._playerX.executeChoiceCardEvent = event;
+        this._playerY.executeChoiceCardEvent = event;
+        this._playerZ.executeChoiceCardEvent = event;
+    }
+
+    /**
+     * 执行选择出牌
+     * @param player 
+     * @param cards 
+     */
+    public executeChoiceCard(player: DDZPlayer, cards: Array<number>): void {
+        player.executeChoiceCard(cards);
+
+        // 下一个玩家选择牌
+        let nextPlayer = this._nextPlayer(player);
+        this.choiceCard(nextPlayer, cards);
+    }
+
+    /**
+     * 选择分数最高的玩家
+     */
+    private _highestScorePlayer(): DDZPlayer {
+        if (this._playerX.score >= this._playerY.score && this._playerX.score >= this._playerZ.score) return this._playerX;
+        else if (this._playerY.score >= this._playerX.score && this._playerY.score >= this._playerZ.score) return this._playerY;
+        return this._playerZ;
     }
 
     /**
      * 下一个玩家
      * @param player 相对玩家
      */
-    public nextPlayer(player: DDZPlayer): DDZPlayer {
+    private _nextPlayer(player: DDZPlayer): DDZPlayer {
         if (this.isPlayerX(player)) return this.playerZ;
         if (this.isPlayerY(player)) return this.playerX;
         return this.playerY;
@@ -405,7 +502,7 @@ export class DDZRound {
      * 是否为相同玩家
      * @param player 相对玩家
      */
-    public isSamePlayer(player: DDZPlayer, target: DDZPlayer): boolean {
+    private _isSamePlayer(player: DDZPlayer, target: DDZPlayer): boolean {
         return player.id == target.id;
     }
 
@@ -437,7 +534,7 @@ export class DDZRound {
      * 随机玩家
      * @returns 返回随机的玩家
      */
-    private randomPlayer(): DDZPlayer {
+    private _randomPlayer(): DDZPlayer {
         let tryCount = 8;
         let players: Array<DDZPlayer> = [this.playerX, this.playerY, this.playerZ];
         for (let i = 0; i < players.length; i++) {

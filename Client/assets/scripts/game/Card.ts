@@ -31,8 +31,6 @@ export default class Card extends cc.Component {
         this._iconSprite = this.node.getChildByName("icon").getComponent(cc.Sprite);
         this._maskSprite = this.node.getChildByName("mask").getComponent(cc.Sprite);
         this._btn = this.node.getComponent(cc.Button);
-
-        this._maskSprite.node.active = false;
     }
 
     /**
@@ -42,7 +40,7 @@ export default class Card extends cc.Component {
      * @param atlas 图集
      * @param clickHandler 点击事件
      */
-    public initCard(cId: number, cardSize: cc.Vec2, atlas: cc.SpriteAtlas, clickHandler: cc.Component.EventHandler): void {
+    public initCard(cId: number, cardSize: cc.Vec2, atlas: cc.SpriteAtlas): void {
         this._cId = cId;
         this.isDequeue = false;
         this.isSelected = false;
@@ -51,9 +49,8 @@ export default class Card extends cc.Component {
         this._iconSprite.node.setContentSize(cardSize.x, cardSize.y);
         this._maskSprite.spriteFrame = atlas.getSpriteFrame(cId.toString());
         this._maskSprite.node.setContentSize(cardSize.x, cardSize.y);
-        if (clickHandler) {
-            this._btn.clickEvents.push(clickHandler);
-        }
+
+        this._maskSprite.node.active = false;
     }
 
     /**

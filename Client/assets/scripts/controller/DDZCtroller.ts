@@ -15,6 +15,9 @@ export default class DDZCtroller extends BaseController {
     private _view: DDZView = null;
     // round
     private _round: DDZRound = null;
+    public get round(): DDZRound {
+        return this._round;
+    }
     /**
      * controller create
      * @param name 
@@ -35,24 +38,111 @@ export default class DDZCtroller extends BaseController {
 
         // 创建 Round
         this._round = new DDZRound();
-        // 初始化 Round
         this._round.initRound();
 
         // 绑定事件
         // 准备
-        this._round.bindReadyEvent({ name: "onReady", handler: this.onReadyEvent, context: this });
+        this._round.bindReadyEvent({ name: "_onReadyEvent", handler: this._onReadyEvent, context: this });
         // 发牌
-        this._round.bindDealEvent({ name: "onDeal", handler: this.onDealEvent, context: this });
-        // 开始抢地主
-        this._round.bindStartGrabEvent({ name: "onStartGrab", handler: this.onStartGrabEvent, context: this });
-        // 开始抢地主
-        this._round.bindGrab({ name: "onGrab", handler: this.onGrabEvent, context: this });
-        // 设置地主
-        this._round.bindSetLandlord({ name: "onSetLandlord", handler: this.onSetLandlordEvent, context: this });
+        this._round.bindDealEvent({ name: "_onDealEvent", handler: this._onDealEvent, context: this });
+        // 选择分数
+        this._round.bindChoiceScoreEvent({ name: "_onChoiceScoreEvent", handler: this._onChoiceScoreEvent, context: this });
+        // 执行选择分数
+        this._round.bindExecuteChoiceScoreEvent({ name: "_onExecuteChoiceScoreEvent", handler: this._onExecuteChoiceScoreEvent, context: this });
+        // 产生地主
+        this._round.bindCreateLordEvent({ name: "_onCreateLordEvent", handler: this._onCreateLordEvent, context: this });
+        // 选择出牌
+        this._round.bindChoiceCardEevnt({ name: "_onChoiceCardEevnt", handler: this._onChoiceCardEevnt, context: this });
+        // 执行选择出牌
+        this._round.bindExecuteChoiceCardEvent({ name: "_onExecuteChoiceCardEvent", handler: this._onExecuteChoiceCardEvent, context: this });
 
         // Round 准备
         this._round.ready();
     }
+
+    /**
+     * 准备
+     * @param data 
+     */
+    private _onReadyEvent(data: DDZEventData): void {
+        // head 设置
+        this._view.headX.setHead("");
+        this._view.headX.setScore(this._round.playerX.coin);
+
+        this._view.headY.setHead("");
+        this._view.headY.setScore(this._round.playerY.coin);
+
+        this._view.headZ.setHead("");
+        this._view.headZ.setScore(this._round.playerZ.coin);
+    }
+
+    /**
+     * 发牌
+     * @param data 
+     */
+    private _onDealEvent(data: DDZEventData): void {
+        this._view.cards.initCards(data.cards);
+    }
+
+    /**
+     * 选择分数
+     * @param data 
+     */
+    private _onChoiceScoreEvent(data: DDZEventData): void {
+        if (this._round.isPlayerX(data.player)) this._view.setChoiceScoreX();
+        else if (this._round.isPlayerY(data.player)) this._view.setChoiceScoreY();
+        else this._view.setChoiceScoreZ(data.minScore);
+    }
+
+    /**
+     * 执行选择分数
+     * @param data 
+     */
+    private _onExecuteChoiceScoreEvent(data: DDZEventData): void {
+        if (this._round.isPlayerX(data.player)) this._view.setExecuteChoiceScoreX(data.choiceScore);
+        else if (this._round.isPlayerY(data.player)) this._view.setExecuteChoiceScoreY(data.choiceScore);
+        else this._view.setExecuteChoiceScoreZ(data.choiceScore);
+    }
+
+    /**
+     * 设置地主
+     * @param data 
+     */
+    private _onCreateLordEvent(data: DDZEventData): void {
+        // 显示底牌
+        this._view.setWcard(data.wcards);
+
+        // 设置手中牌
+        if (data.player.owner) {
+            this._view.cards.initCards(data.cards);
+            this._view.cards.dequeueCards(data.wcards);
+        }
+
+        // 设置地主标志
+        if (this._round.isPlayerX(data.player)) this._view.setCreateLordX();
+        else if (this._round.isPlayerY(data.player)) this._view.setCreateLordY();
+        else this._view.setCreateLordZ();
+    }
+
+    /**
+     * 选择出牌
+     * @param data 
+     */
+    private _onChoiceCardEevnt(data: DDZEventData): void {
+        if (this._round.isPlayerX(data.player)) this._view.setChoiceCardX();
+        else if (this._round.isPlayerY(data.player)) this._view.setChoiceCardY();
+        else this._view.setChoiceCardZ();
+    }
+
+    /**
+     * 执行选择出牌
+     * @param data 
+     */
+    private _onExecuteChoiceCardEvent(data: DDZEventData): void {
+
+    }
+
+
 
     public update(dt): void {
         if (!this.active)
@@ -61,100 +151,5 @@ export default class DDZCtroller extends BaseController {
 
     public getResPath(): string {
         return "prefabs/ui/ddz_view";
-    }
-
-    /**
-     * 准备
-     * @param data 
-     */
-    private onReadyEvent(data: DDZEventData): void {
-        // 设置头像和积分
-        this._view.headX.setHead("");
-        this._view.headX.setScore(this._round.playerX.score);
-        this._view.headY.setHead("");
-        this._view.headY.setScore(this._round.playerY.score);
-        this._view.headZ.setHead("");
-        this._view.headZ.setScore(this._round.playerZ.score);
-    }
-
-    /**
-     * 发牌
-     * @param data 
-     */
-    private onDealEvent(data: DDZEventData): void {
-        this._view.cards.initCards(data.cards);
-    }
-
-    /**
-     * 开始抢地主
-     * @param data 
-     */
-    private onStartGrabEvent(data: DDZEventData): void {
-        // x 玩家开始抢地主
-        if (this._round.isPlayerX(data.player)) {
-            this._view.setStartGrabLandlordX();
-        }
-        // y 玩家开始抢地主
-        else if (this._round.isPlayerY(data.player)) {
-            this._view.setStartGrabLandlordY();
-        }
-        // z 玩家开始抢地主
-        else {
-            this._view.setStartGrabLandlordZ(data.minScore);
-        }
-    }
-
-    /**
-     * 抢地主
-     * @param data 
-     */
-    private onGrabEvent(data: DDZEventData): void {
-        // x 玩家抢地主
-        if (this._round.isPlayerX(data.player)) {
-            this._view.setGrabLandlordX(data.grabScore);
-        }
-        // y 玩家抢地主
-        else if (this._round.isPlayerY(data.player)) {
-            this._view.setGrabLandlordY(data.grabScore);
-        }
-        // z 玩家抢地主
-        else {
-            this._view.setGrabLandlordZ(data.grabScore);
-        }
-    }
-
-    /**
-     * 玩家操作抢地主按钮
-     * @param score 抢的分数
-     */
-    public onClickGrab(score: number): void {
-        this._round.grab(this._round.playerZ, score);
-    }
-
-    /**
-     * 设置地主
-     * @param data 
-     */
-    private onSetLandlordEvent(data: DDZEventData): void {
-        // 显示底牌
-        this._view.setWcard(data.wcards);
-
-        // 设置地主标志
-        // x 玩家设置地主
-        if (this._round.isPlayerX(data.player)) {
-            this._view.setLandlordX();
-        }
-        // y 玩家设置地主
-        else if (this._round.isPlayerY(data.player)) {
-            this._view.setLandlordY();
-        }
-        // z 玩家设置地主
-        else {
-            this._view.setLandlordZ();
-
-            // 显示自己的牌，并且底牌需要出队
-            this._view.cards.initCards(data.cards);
-            this._view.cards.dequeueCards(data.wcards);
-        }
     }
 }

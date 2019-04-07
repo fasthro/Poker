@@ -1,7 +1,8 @@
 import DDZHeadCom from "../game/ddz/component/DDZHeadCom";
 import Cards from "../game/Cards";
-import DDZMessageCom from "../game/ddz/component/DDZMessageCom";
+import DDZBehaviorCom from "../game/ddz/component/DDZBehaviorCom";
 import DDZCtroller from "../controller/DDZCtroller";
+import DDZString from "../language/DDZString";
 
 /*
  * @Author: fasthro
@@ -34,48 +35,53 @@ export default class DDZView extends cc.Component {
     public headZ: DDZHeadCom = null;
 
     // 消息
-    @property(DDZMessageCom)
-    public messageX: DDZMessageCom = null;
-    @property(DDZMessageCom)
-    public messageY: DDZMessageCom = null;
-    @property(DDZMessageCom)
-    public messageZ: DDZMessageCom = null;
+    @property(DDZBehaviorCom)
+    public behaviorX: DDZBehaviorCom = null;
+    @property(DDZBehaviorCom)
+    public behaviorY: DDZBehaviorCom = null;
+    @property(DDZBehaviorCom)
+    public behaviorZ: DDZBehaviorCom = null;
 
-    // 操作node
+    // 选择牌按钮 node
     @property(cc.Node)
-    public operateNode: cc.Node = null;
+    public choiceCardNode: cc.Node = null;
     // 不出
     @property(cc.Button)
     public btnPass: cc.Button = null;
-    // 提示
+    // 智能提示
     @property(cc.Button)
-    public btnHint: cc.Button = null;
+    public btnAI: cc.Button = null;
     // 出牌
     @property(cc.Button)
     public btnDiscard: cc.Button = null;
 
-    // 抢地主node
+    // 选择分数按钮 node
     @property(cc.Node)
-    public grabLandlordNode: cc.Node = null;
+    public choiceScoreNode: cc.Node = null;
     // 不叫
     @property(cc.Button)
-    public btnUnGrab: cc.Button = null;
+    public btnUnChoice: cc.Button = null;
     // 一分
     @property(cc.Button)
-    public btnScore1: cc.Button = null;
+    public btnChoiceScore1: cc.Button = null;
     // 二分
     @property(cc.Button)
-    public btnScore2: cc.Button = null;
+    public btnChoiceScore2: cc.Button = null;
     // 三分
     @property(cc.Button)
-    public btnScore3: cc.Button = null;
+    public btnChoiceScore3: cc.Button = null;
 
     onLoad() {
-        // 注册抢地主按钮事件
-        this.btnUnGrab.clickEvents.push(this.createClickEventHandler("onClickGrab", "0"));
-        this.btnScore1.clickEvents.push(this.createClickEventHandler("onClickGrab", "1"));
-        this.btnScore2.clickEvents.push(this.createClickEventHandler("onClickGrab", "2"));
-        this.btnScore3.clickEvents.push(this.createClickEventHandler("onClickGrab", "3"));
+        // 注册选择分数按钮事件
+        this.btnUnChoice.clickEvents.push(this.createClickEventHandler("onClickChoiceScore", "0"));
+        this.btnChoiceScore1.clickEvents.push(this.createClickEventHandler("onClickChoiceScore", "1"));
+        this.btnChoiceScore2.clickEvents.push(this.createClickEventHandler("onClickChoiceScore", "2"));
+        this.btnChoiceScore3.clickEvents.push(this.createClickEventHandler("onClickChoiceScore", "3"));
+
+        // 注册出牌按钮事件
+        this.btnPass.clickEvents.push(this.createClickEventHandler("onClickChoiceCardPass"));
+        this.btnAI.clickEvents.push(this.createClickEventHandler("onClickChoiceCardAI"));
+        this.btnDiscard.clickEvents.push(this.createClickEventHandler("onClickChoiceCardDiscard"));
     }
 
     /**
@@ -85,116 +91,104 @@ export default class DDZView extends cc.Component {
         this._controller = controller;
 
         this.cards.initCards([]);
+        this.wcards.initCards([]);
+
         this.headX.init();
         this.headY.init();
         this.headZ.init();
 
-        this.messageX.init();
-        this.messageY.init();
-        this.messageZ.init();
+        this.behaviorX.init();
+        this.behaviorY.init();
+        this.behaviorZ.init();
 
-        this.operateNode.active = false;
-        this.grabLandlordNode.active = false;
+        this.choiceScoreNode.active = false;
+        this.choiceCardNode.active = false;
     }
 
     /**
-     * 设置 PlayerX 开始抢地主
+     * 设置X选择分数
      */
-    public setStartGrabLandlordX(): void {
-        this.grabLandlordNode.active = false;
+    public setChoiceScoreX(): void {
+        this.choiceScoreNode.active = false;
     }
 
     /**
-     * 设置 PlayerY 开始抢地主
+     * 设置Y选择分数
      */
-    public setStartGrabLandlordY(): void {
-        this.grabLandlordNode.active = false;
+    public setChoiceScoreY(): void {
+        this.choiceScoreNode.active = false;
     }
 
     /**
-     * 设置 PlayerZ 开始抢地主
-     * @param minScore 最小可抢分数
+     * 设置Z选择分数
+     * @param minScore 最小可选分数
      */
-    public setStartGrabLandlordZ(minScore: number): void {
-        this.grabLandlordNode.active = true;
-        this.btnScore1.interactable = minScore <= 1;
-        this.btnScore2.interactable = minScore <= 2;
-        this.btnScore3.interactable = minScore <= 3;
+    public setChoiceScoreZ(minScore: number): void {
+        this.choiceScoreNode.active = true;
+
+        this.btnChoiceScore1.interactable = minScore <= 1;
+        this.btnChoiceScore2.interactable = minScore <= 2;
+        this.btnChoiceScore3.interactable = minScore <= 3;
     }
 
     /**
-     * 设置 PlayerX 抢地主
+     * 设置X执行选择分数
      * @param score 抢的分数
      */
-    public setGrabLandlordX(score: number): void {
-        if (score > 0) {
-            this.messageX.setScore(score);
-        }
-        else {
-            this.messageX.setPopup("不叫");
-        }
+    public setExecuteChoiceScoreX(score: number): void {
+        if (score > 0) this.behaviorX.setScore(true, score);
+        else this.behaviorX.setBehavior(true, DDZString.unChoiceScore);
     }
 
     /**
-     * 设置 PlayerY 抢地主
+     * 设置Y执行选择分数
      * @param score 抢的分数
      */
-    public setGrabLandlordY(score: number): void {
-        if (score > 0) {
-            this.messageY.setScore(score);
-        }
-        else {
-            this.messageY.setPopup("不叫");
-        }
+    public setExecuteChoiceScoreY(score: number): void {
+        if (score > 0) this.behaviorY.setScore(true, score);
+        else this.behaviorY.setBehavior(true, DDZString.unChoiceScore);
     }
 
     /**
-     * 设置 PlayerZ 抢地主
+     * 设置Z执行选择分数
      * @param score 抢的分数
      */
-    public setGrabLandlordZ(score: number): void {
-        if (score > 0) {
-            this.messageZ.setScore(score);
-        }
-        else {
-            this.messageZ.setPopup("不叫");
-        }
+    public setExecuteChoiceScoreZ(score: number): void {
+        if (score > 0) this.behaviorZ.setScore(true, score);
+        else this.behaviorZ.setBehavior(true, DDZString.unChoiceScore);
     }
 
     /**
-     * 设置 PlayerX 为地主
+     * 设置X为地主
      */
-    public setLandlordX(): void {
-        this.grabLandlordNode.active = false;
-        this.headX.setDZ();
-
-        this.messageX.init();
-        this.messageY.init();
-        this.messageZ.init();
+    public setCreateLordX(): void {
+        this._setCreateLord();
+        this.headX.setLord(true);
     }
 
     /**
-     * 设置 PlayerY 为地主
+     * 设置Y为地主
      */
-    public setLandlordY(): void {
-        this.grabLandlordNode.active = false;
-        this.headY.setDZ();
-
-        this.messageX.init();
-        this.messageY.init();
-        this.messageZ.init();
+    public setCreateLordY(): void {
+        this._setCreateLord();
+        this.headY.setLord(true);
     }
 
     /**
-     * 设置 PlayerZ 为地主
+     * 设置Z为地主
      */
-    public setLandlordZ(): void {
-        this.grabLandlordNode.active = false;
-        this.headZ.setDZ();
+    public setCreateLordZ(): void {
+        this._setCreateLord();
+        this.headZ.setLord(true);
+    }
 
-        this.messageX.init();
-        this.messageY.init();
-        this.messageZ.init();
+    /**
+     * 设置地主
+     */
+    private _setCreateLord(): void {
+        this.behaviorX.init();
+        this.behaviorY.init();
+        this.behaviorZ.init();
     }
 
     /**
@@ -206,13 +200,66 @@ export default class DDZView extends cc.Component {
     }
 
     /**
-     * 抢地主按钮事件
+     * 设置X选择出牌
+     * @param active 
+     */
+    public setChoiceCardX(): void {
+        this.choiceCardNode.active = false;
+    }
+
+    /**
+     * 设置Y选择出牌
+     * @param active 
+     */
+    public setChoiceCardY(): void {
+        this.choiceCardNode.active = false;
+    }
+
+    /**
+     * 设置Z选择出牌
+     * @param active 
+     * @param ocard 对手牌
+     */
+    public setChoiceCardZ(active: boolean, ocard: Array<number>): void {
+        this.choiceCardNode.active = true;
+    }
+
+    /**
+     * 选择分数按钮事件回调
      * @param event 
      * @param customEventData 
      */
-    private onClickGrab(event, customEventData): void {
+    private onClickChoiceScore(event, customEventData): void {
         let score: number = parseInt(customEventData);
-        this._controller.onClickGrab(score);
+        this._controller.round.executeChoiceScore(this._controller.round.playerZ, score);
+        this.choiceScoreNode.active = false;
+    }
+
+    /**
+     * 不出按钮事件回调
+     * @param event 
+     * @param customEventData 
+     */
+    private onClickChoiceCardPass(event, customEventData): void {
+        
+    }
+
+    /**
+     * 提示按钮事件回调
+     * @param event 
+     * @param customEventData 
+     */
+    private onClickChoiceCardAI(event, customEventData): void {
+        
+    }
+
+    /**
+     * 出牌按钮事件回调
+     * @param event 
+     * @param customEventData 
+     */
+    private onClickChoiceCardDiscard(event, customEventData): void {
+        
     }
 
     /**
@@ -220,7 +267,7 @@ export default class DDZView extends cc.Component {
      * @param handler 
      * @param customEventData 
      */
-    private createClickEventHandler(handler: string, customEventData: string) {
+    private createClickEventHandler(handler: string, customEventData: string = "") {
         var clickEventHandler = new cc.Component.EventHandler();
         clickEventHandler.target = this.node;
         clickEventHandler.component = "DDZView";

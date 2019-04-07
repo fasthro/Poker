@@ -2032,7 +2032,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "message_z",
+    "_name": "behavior_z",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -3055,7 +3055,7 @@
     "_id": ""
   },
   {
-    "__type__": "90608TuhONItZc086TIYiQi",
+    "__type__": "ea9cbpca8RIEanKirHrSPbY",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -3101,7 +3101,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "message_y",
+    "_name": "behavior_y",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -3365,7 +3365,7 @@
         "__id__": 100
       }
     ],
-    "_active": false,
+    "_active": true,
     "_level": 3,
     "_components": [],
     "_prefab": {
@@ -3834,7 +3834,7 @@
         "__id__": 114
       }
     ],
-    "_active": false,
+    "_active": true,
     "_level": 3,
     "_components": [],
     "_prefab": {
@@ -4124,7 +4124,7 @@
     "_id": ""
   },
   {
-    "__type__": "90608TuhONItZc086TIYiQi",
+    "__type__": "ea9cbpca8RIEanKirHrSPbY",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -4170,7 +4170,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "message_x",
+    "_name": "behavior_x",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -5193,7 +5193,7 @@
     "_id": ""
   },
   {
-    "__type__": "90608TuhONItZc086TIYiQi",
+    "__type__": "ea9cbpca8RIEanKirHrSPbY",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -5239,7 +5239,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "operate_node",
+    "_name": "choice_card_node",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -5255,7 +5255,7 @@
         "__id__": 175
       }
     ],
-    "_active": false,
+    "_active": true,
     "_level": 2,
     "_components": [],
     "_prefab": {
@@ -6129,7 +6129,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn_hint",
+    "_name": "btn_ai",
     "_objFlags": 0,
     "_parent": {
       "__id__": 152
@@ -6551,7 +6551,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "grab_landlord_node",
+    "_name": "choice_score_node",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -6570,7 +6570,7 @@
         "__id__": 221
       }
     ],
-    "_active": false,
+    "_active": true,
     "_level": 2,
     "_components": [],
     "_prefab": {
@@ -6622,7 +6622,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn_unGrab",
+    "_name": "btn_unChoice",
     "_objFlags": 0,
     "_parent": {
       "__id__": 187
@@ -8579,40 +8579,40 @@
     "headZ": {
       "__id__": 19
     },
-    "messageX": {
+    "behaviorX": {
       "__id__": 150
     },
-    "messageY": {
+    "behaviorY": {
       "__id__": 119
     },
-    "messageZ": {
+    "behaviorZ": {
       "__id__": 88
     },
-    "operateNode": {
+    "choiceCardNode": {
       "__id__": 152
     },
     "btnPass": {
       "__id__": 173
     },
-    "btnHint": {
+    "btnAI": {
       "__id__": 184
     },
     "btnDiscard": {
       "__id__": 162
     },
-    "grabLandlordNode": {
+    "choiceScoreNode": {
       "__id__": 187
     },
-    "btnUnGrab": {
+    "btnUnChoice": {
       "__id__": 197
     },
-    "btnScore1": {
+    "btnChoiceScore1": {
       "__id__": 208
     },
-    "btnScore2": {
+    "btnChoiceScore2": {
       "__id__": 219
     },
-    "btnScore3": {
+    "btnChoiceScore3": {
       "__id__": 230
     },
     "_id": ""

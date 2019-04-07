@@ -50,8 +50,9 @@ export default class DDZHeadCom extends cc.Component {
 
     /**
      * 设置地主
+     * @param active 
      */
-    public setDZ(): void {
-        this.dzNode.active = true;
+    public setLord(active: boolean): void {
+        this.dzNode.active = active;
     }
 }

@@ -149,13 +149,6 @@ export default class Cards extends cc.Component {
         card.node.setSiblingIndex(index);
 
         if (this.touchEnabled) {
-            // click
-            let clickHandler = new cc.Component.EventHandler();
-            clickHandler.component = "Cards";
-            clickHandler.target = this.node;
-            clickHandler.handler = "onCardClick";
-            clickHandler.customEventData = index.toString();
-
             // touch event
             card.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
             card.node.on(cc.Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
@@ -163,11 +156,11 @@ export default class Cards extends cc.Component {
             card.node.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
 
             // init
-            card.initCard(cId, this.cardSize, this.atlas, clickHandler);
+            card.initCard(cId, this.cardSize, this.atlas);
         }
         else {
             // init
-            card.initCard(cId, this.cardSize, this.atlas, null);
+            card.initCard(cId, this.cardSize, this.atlas);
         }
     }
 
@@ -218,22 +211,11 @@ export default class Cards extends cc.Component {
     }
 
     /**
-     * 单张牌点击事件回调
-     * @param event 
-     * @param customEventData 弹出的间距
-     */
-    private onCardClick(event, customEventData): void {
-        let index: number = parseInt(customEventData);
-        let card: Card = this._cards[index];
-        card.isDequeue = !card.isDequeue;
-        card.node.setPosition(this.getCardPosition(index, this._cards.length, card.isDequeue));
-    }
-
-    /**
      * touch start
      * @param event 
      */
     private onTouchStart(event): void {
+        console.log("onTouchStart");
         if (!this._touchEvent) {
 
             this._touchEvent = event.touch;
@@ -244,6 +226,7 @@ export default class Cards extends cc.Component {
                 let rect: cc.Rect = card.node.getBoundingBoxToWorld();
                 rect.width = this.cardSize.x;
                 if (rect.contains(event.touch.getLocation())) {
+                    card.isSelected = true;
                     card.showMask(true);
                     break;
                 }

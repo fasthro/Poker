@@ -5,5 +5,5 @@
  */
 
 export default class DDZString {
-    public static unGrab: string = "不叫";
+    public static unChoiceScore: string = "不叫";
 }

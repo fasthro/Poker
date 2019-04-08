@@ -21,7 +21,7 @@ export default class DDZResultController extends BaseController {
     }
 
     public getResPath(): string {
-        return "prefabs/ui/ddz_result_view";
+        return "prefabs/ui/ddzResult_view";
     }
 
     public initialize(): void {

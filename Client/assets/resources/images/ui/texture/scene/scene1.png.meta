@@ -1,15 +1,15 @@
 {
   "ver": "2.2.0",
-  "uuid": "b3c75921-c3a8-4692-a8b1-0eacf4906eb0",
+  "uuid": "6b4ab8e2-4c35-424e-8460-a76c8ba57fa7",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "subMetas": {
-    "效果图-设置": {
+    "scene1": {
       "ver": "1.0.3",
-      "uuid": "6fdf3942-c9b0-456a-acb0-97ce0694bff6",
-      "rawTextureUuid": "b3c75921-c3a8-4692-a8b1-0eacf4906eb0",
+      "uuid": "94e7dc1b-6186-4df9-9af5-15f2e242b0dd",
+      "rawTextureUuid": "6b4ab8e2-4c35-424e-8460-a76c8ba57fa7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

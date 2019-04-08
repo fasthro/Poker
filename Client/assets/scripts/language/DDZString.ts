@@ -6,4 +6,6 @@
 
 export default class DDZString {
     public static unChoiceScore: string = "不叫";
+    public static unChoiceCard: string = "不出";
+    
 }

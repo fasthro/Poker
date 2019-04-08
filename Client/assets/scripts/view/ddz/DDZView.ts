@@ -1,8 +1,9 @@
-import DDZHeadCom from "../game/ddz/component/DDZHeadCom";
-import Cards from "../game/Cards";
-import DDZBehaviorCom from "../game/ddz/component/DDZBehaviorCom";
-import DDZCtroller from "../controller/DDZCtroller";
-import DDZString from "../language/DDZString";
+import DDZCtroller from "../../controller/ddz/DDZCtroller";
+import Cards from "../../game/Cards";
+import DDZHeadCom from "../../game/ddz/component/DDZHeadCom";
+import DDZBehaviorCom from "../../game/ddz/component/DDZBehaviorCom";
+import DDZString from "../../language/DDZString";
+
 
 /*
  * @Author: fasthro
@@ -106,6 +107,18 @@ export default class DDZView extends cc.Component {
     }
 
     /**
+     * 设置发牌
+     * @param cards 
+     */
+    public setDeal(cards: Array<number>): void {
+        this.cards.initCards(cards);
+
+        this.behaviorX.setCardCount(true, cards.length);
+        this.behaviorY.setCardCount(true, cards.length);
+        this.behaviorZ.setCardCount(false);
+    }
+
+    /**
      * 设置X选择分数
      */
     public setChoiceScoreX(): void {
@@ -162,7 +175,9 @@ export default class DDZView extends cc.Component {
      * 设置X为地主
      */
     public setCreateLordX(): void {
-        this._setCreateLord();
+        this.behaviorX.setScore(false);
+        this.behaviorY.setScore(false);
+        this.behaviorZ.setScore(false);
         this.headX.setLord(true);
     }
 
@@ -170,7 +185,9 @@ export default class DDZView extends cc.Component {
      * 设置Y为地主
      */
     public setCreateLordY(): void {
-        this._setCreateLord();
+        this.behaviorX.setScore(false);
+        this.behaviorY.setScore(false);
+        this.behaviorZ.setScore(false);
         this.headY.setLord(true);
     }
 
@@ -178,19 +195,11 @@ export default class DDZView extends cc.Component {
      * 设置Z为地主
      */
     public setCreateLordZ(): void {
-        this._setCreateLord();
+        this.behaviorX.setScore(false);
+        this.behaviorY.setScore(false);
+        this.behaviorZ.setScore(false);
         this.headZ.setLord(true);
     }
-
-    /**
-     * 设置地主
-     */
-    private _setCreateLord(): void {
-        this.behaviorX.init();
-        this.behaviorY.init();
-        this.behaviorZ.init();
-    }
-
     /**
      * 设置底牌
      * @param cards 
@@ -220,12 +229,65 @@ export default class DDZView extends cc.Component {
      * @param active 
      * @param ocard 对手牌
      */
-    public setChoiceCardZ(active: boolean, ocard: Array<number>): void {
+    public setChoiceCardZ(active: boolean, ocards?: Array<number>): void {
         this.choiceCardNode.active = true;
     }
 
     /**
-     * 选择分数按钮事件回调
+     * 设置X执行选择出牌
+     * @param dcards 
+     * @param cards 
+     */
+    public setExecuteChoiceCardX(dcards: Array<number>, cards: Array<number>): void {
+        this.behaviorX.setCardCount(true, cards.length);
+        if (dcards.length == 0) {
+            this.behaviorX.setBehavior(true, DDZString.unChoiceCard);
+            this.behaviorX.setDcard(false);
+        }
+        else {
+            this.behaviorX.setBehavior(false);
+            this.behaviorX.setDcard(true, dcards);
+        }
+    }
+
+    /**
+     * 设置Y执行选择出牌
+     * @param dcards 
+     * @param cards 
+     */
+    public setExecuteChoiceCardY(dcards: Array<number>, cards: Array<number>): void {
+        this.behaviorY.setCardCount(true, cards.length);
+        if (dcards.length == 0) {
+            this.behaviorY.setBehavior(true, DDZString.unChoiceCard);
+            this.behaviorY.setDcard(false);
+        }
+        else {
+            this.behaviorY.setBehavior(false);
+            this.behaviorY.setDcard(true, dcards);
+        }
+    }
+
+    /**
+     * 设置Z执行选择出牌
+     * @param dcards 
+     * @param cards 
+     */
+    public setExecuteChoiceCardZ(dcards: Array<number>, cards: Array<number>): void {
+        this.cards.initCards(cards);
+        this.behaviorZ.setCardCount(false);
+        if (dcards.length == 0) {
+            this.behaviorZ.setBehavior(true, DDZString.unChoiceCard);
+            this.behaviorZ.setDcard(false);
+        }
+        else {
+            this.behaviorZ.setBehavior(false);
+            this.behaviorZ.setDcard(true, dcards);
+        }
+        this.choiceCardNode.active = false;
+    }
+
+    /**
+     * clickEvent 选择分数
      * @param event 
      * @param customEventData 
      */
@@ -236,12 +298,12 @@ export default class DDZView extends cc.Component {
     }
 
     /**
-     * 不出按钮事件回调
+     * clickEvent 不出
      * @param event 
      * @param customEventData 
      */
     private onClickChoiceCardPass(event, customEventData): void {
-        
+        this._controller.round.executeChoiceCard(this._controller.round.playerZ, []);
     }
 
     /**
@@ -250,7 +312,7 @@ export default class DDZView extends cc.Component {
      * @param customEventData 
      */
     private onClickChoiceCardAI(event, customEventData): void {
-        
+
     }
 
     /**
@@ -259,7 +321,7 @@ export default class DDZView extends cc.Component {
      * @param customEventData 
      */
     private onClickChoiceCardDiscard(event, customEventData): void {
-        
+        this._controller.round.executeChoiceCard(this._controller.round.playerZ, this.cards.getDequeueCards());
     }
 
     /**

@@ -1,8 +1,10 @@
-import BaseController from "./BaseController";
-import DDZView from "../view/DDZView";
-import { UILayer } from "../define/UILayer";
-import { DDZRound, DDZEventData, DDZPlayer } from "../game/ddz/DDZRound";
-import DDZ = require("../game/ddz/DDZ");
+import BaseController from "../BaseController";
+import DDZView from "../../view/ddz/DDZView";
+import { DDZRound, DDZEvent, DDZEventData } from "../../game/ddz/DDZRound";
+import { UILayer } from "../../define/UILayer";
+import Game from "../../Game";
+import { ControllerType } from "../../define/Controllers";
+
 
 /*
  * @Author: fasthro
@@ -18,6 +20,7 @@ export default class DDZCtroller extends BaseController {
     public get round(): DDZRound {
         return this._round;
     }
+
     /**
      * controller create
      * @param name 
@@ -37,8 +40,10 @@ export default class DDZCtroller extends BaseController {
         this._view.initView(this);
 
         // 创建 Round
-        this._round = new DDZRound();
-        this._round.initRound();
+        let breakEvent: DDZEvent = { name: "_onBreakEvent", handler: this._onBreakEvent, context: this };
+        let overEvent: DDZEvent = { name: "_onOverEvent", handler: this._onOverEvent, context: this };
+        // 创建 Round
+        this._round = new DDZRound(breakEvent, overEvent);
 
         // 绑定事件
         // 准备
@@ -56,8 +61,26 @@ export default class DDZCtroller extends BaseController {
         // 执行选择出牌
         this._round.bindExecuteChoiceCardEvent({ name: "_onExecuteChoiceCardEvent", handler: this._onExecuteChoiceCardEvent, context: this });
 
-        // Round 准备
+        // Round
+        this._round.init();
         this._round.ready();
+    }
+
+    /**
+     * 比赛中止,流局
+     * @param data 
+     */
+    private _onBreakEvent(data: DDZEventData): void {
+
+    }
+
+    /**
+     * 比赛结束
+     * @param data 
+     */
+    private _onOverEvent(data: DDZEventData): void {
+        console.log("ffffffffffffff");
+        Game.showUI(ControllerType.DDZRusult);
     }
 
     /**
@@ -81,7 +104,7 @@ export default class DDZCtroller extends BaseController {
      * @param data 
      */
     private _onDealEvent(data: DDZEventData): void {
-        this._view.cards.initCards(data.cards);
+        this._view.setDeal(data.cards);
     }
 
     /**
@@ -131,7 +154,7 @@ export default class DDZCtroller extends BaseController {
     private _onChoiceCardEevnt(data: DDZEventData): void {
         if (this._round.isPlayerX(data.player)) this._view.setChoiceCardX();
         else if (this._round.isPlayerY(data.player)) this._view.setChoiceCardY();
-        else this._view.setChoiceCardZ();
+        else this._view.setChoiceCardZ(true, data.ocards);
     }
 
     /**
@@ -139,10 +162,10 @@ export default class DDZCtroller extends BaseController {
      * @param data 
      */
     private _onExecuteChoiceCardEvent(data: DDZEventData): void {
-
+        if (this._round.isPlayerX(data.player)) this._view.setExecuteChoiceCardX(data.dcards, data.cards);
+        else if (this._round.isPlayerY(data.player)) this._view.setExecuteChoiceCardY(data.dcards, data.cards);
+        else this._view.setExecuteChoiceCardZ(data.dcards, data.cards);
     }
-
-
 
     public update(dt): void {
         if (!this.active)

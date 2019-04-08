@@ -1,3 +1,5 @@
+import Cards from "../../Cards";
+
 /*
  * @Author: fasthro
  * @Description: 斗地主牌桌行为组件
@@ -38,6 +40,13 @@ export default class DDZBehaviorCom extends cc.Component {
     @property(cc.Label)
     public countdownLabel: cc.Label = null;
 
+    // dcard node
+    @property(cc.Node)
+    public dcardNode: cc.Node = null;
+    // dcards
+    @property(Cards)
+    public dcards: Cards = null;
+
     /**
      * 初始化
      */
@@ -46,6 +55,7 @@ export default class DDZBehaviorCom extends cc.Component {
         this.setBehavior(false);
         this.setCardCount(false);
         this.setCountdown(false);
+        this.setDcard(false);
     }
 
     /**
@@ -82,5 +92,14 @@ export default class DDZBehaviorCom extends cc.Component {
     public setCountdown(active: boolean, time?: number): void {
         this.countdownNode.active = active;
         if (time) this.countdownLabel.string = time.toString();
+    }
+
+    /**
+     * 设置dcards
+     * @param dcards 
+     */
+    public setDcard(active: boolean, dcards?: Array<number>): void {
+        this.dcardNode.active = active;
+        if (dcards) this.dcards.initCards(dcards);
     }
 }

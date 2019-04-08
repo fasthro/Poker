@@ -8,6 +8,15 @@ import Card from "./Card";
 
 const { ccclass, property, menu } = cc._decorator;
 
+/**
+ * 牌伸展方式
+ */
+const STRETCH = cc.Enum({
+    CENTER: 0,
+    LEGT: 1,
+    RIGHT: 2,
+});
+
 @ccclass
 @menu("Game/Cards")
 export default class Cards extends cc.Component {
@@ -31,12 +40,13 @@ export default class Cards extends cc.Component {
     @property(cc.Integer)
     public cardDequeueSpace: number = 60;
 
+    // 伸展方式
+    @property({ type: STRETCH, tooltip: "伸展方式" })
+    public stretch: number = STRETCH.CENTER;
+
     // 是否可操作
     @property(cc.Boolean)
     public touchEnabled: boolean = true;
-
-    // 伸展方式 0 中心向两侧, -1 向左, 1 向右
-    private _stretch: number = 0;
 
     // 牌列表
     private _cards: Array<Card> = [];
@@ -47,16 +57,14 @@ export default class Cards extends cc.Component {
     /**
      * 初始化牌
      * @param cards 牌数组
-     * @param stretch 伸展方式 0 中心向两侧, -1 向左, 1 向右
      */
-    public initCards(cIds: number[], stretch: number = 0): void {
-        this._stretch = stretch;
-
+    public initCards(cIds: number[]): void {
         let rCount = this._cards.length - cIds.length;
         if (rCount > 0) {
             for (let i = 0; i < rCount; i++) {
-                this._cards[0].destroy();
-                this._cards.splice(0, 1);
+                let index = this._cards.length - 1;
+                this._cards[index].node.destroy();
+                this._cards.splice(index, 1);
             }
         }
 
@@ -186,13 +194,13 @@ export default class Cards extends cc.Component {
     private getCardPosition(index: number, total: number, isDequeue: boolean): cc.Vec2 {
         let totalWidth = this.cardSpace * total + this.cardSize.x - this.cardSpace;
         let x: number = 0;
-        if (this._stretch == 0) {
+        if (this.stretch == STRETCH.CENTER) {
             x = index * this.cardSpace - totalWidth / 2;
         }
-        else if (this._stretch == 1) {
+        else if (this.stretch == STRETCH.RIGHT) {
             x = index * this.cardSpace;
         }
-        else if (this._stretch == -1) {
+        else if (this.stretch == STRETCH.LEGT) {
             x = index * this.cardSpace - totalWidth;
         }
         let y = isDequeue ? this.cardDequeueSpace : 0;
@@ -215,7 +223,6 @@ export default class Cards extends cc.Component {
      * @param event 
      */
     private onTouchStart(event): void {
-        console.log("onTouchStart");
         if (!this._touchEvent) {
 
             this._touchEvent = event.touch;

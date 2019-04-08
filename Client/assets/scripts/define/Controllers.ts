@@ -1,7 +1,8 @@
 import LoadingController from "../controller/LoadingController";
 import MainCtroller from "../controller/MainController";
 import InitController from "../controller/InitController";
-import DDZCtroller from "../controller/DDZCtroller";
+import DDZCtroller from "../controller/ddz/DDZCtroller";
+import DDZResultController from "../controller/ddz/DDZResultController";
 
 /*
  * @Author: fasthro
@@ -13,7 +14,10 @@ export enum ControllerType {
     Init,
     Loading,
     Main,
+
+    // ddz
     DDZ,
+    DDZRusult,
 }
 
 export interface ControllerInfo {
@@ -33,6 +37,9 @@ export default class ControllerInfos {
         this.infos[ControllerType.Init] = { name: "init", controller: InitController };
         this.infos[ControllerType.Loading] = { name: "loading", controller: LoadingController };
         this.infos[ControllerType.Main] = { name: "main", controller: MainCtroller };
+
+        // ddz
         this.infos[ControllerType.DDZ] = { name: "ddz", controller: DDZCtroller };
+        this.infos[ControllerType.DDZRusult] = { name: "ddzResult", controller: DDZResultController };
     }
 }

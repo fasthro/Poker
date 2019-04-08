@@ -64,9 +64,9 @@ export class DDZPlayer {
     public set coin(value) { this._coin = value; }
 
     // 是否为地主
-    private _landlord: boolean = false;
-    public get landlord(): boolean { return this._landlord; }
-    public set landlord(value) { this._landlord = value; }
+    private _isLord: boolean = false;
+    public get isLord(): boolean { return this._isLord; }
+    public set isLord(value) { this._isLord = value; }
 
     // 是否托管代理
     private _agent: boolean = false;
@@ -121,14 +121,23 @@ export class DDZPlayer {
      * @param name 名称
      * @param head 头像
      */
-    constructor(round: DDZRound, id: number, name: string, head: string) {
+    constructor(round: DDZRound, id: number, name: string, head: string, coin: number) {
         this._round = round;
         this._id = id;
         this._name = name;
         this._head = head;
+        this._coin = coin;
+    }
 
-        this._coin = 0;
-        this._landlord = false;
+    /**
+     * 初始化
+     * @param owner 是否为操作者
+     * @param agent 是否托管
+     */
+    public init(owner: boolean = false, agent: boolean = false): void {
+        this._owner = owner;
+        this._agent = agent;
+        this._isLord = false;
         this._cards = [];
         this._wcards = [];
         this._dcards = [];
@@ -211,28 +220,39 @@ export class DDZPlayer {
 
     /**
      * 选择出牌
-     * @param cards 
+     * @param ocards 
      */
-    public choiceCard(cards: Array<number>): void {
+    public choiceCard(ocards: Array<number>): void {
         let data: DDZEventData = new DDZEventData();
         data.player = this;
-        data.ocards = cards;
+        data.ocards = ocards;
         this._callEvent(this.choiceCardEvent, data);
 
         // 托管随机抢
         if (this.agent) {
-            this._round.executeChoiceCard(this, []);
+            this._round.executeChoiceCard(this, [this._cards[0], this._cards[1], this._cards[2]]);
         }
     }
 
     /**
      * 执行选择出牌
-     * @param cards 要出去的牌
+     * @param dcards 要出去的牌
      */
-    public executeChoiceCard(cards: Array<number>): void {
+    public executeChoiceCard(dcards: Array<number>): void {
+        // 移除出去的牌
+        for (let i = 0; i < dcards.length; i++) {
+            for (let k = 0; k < this.cards.length; k++) {
+                if (dcards[i] == this.cards[k]) {
+                    this.cards.splice(k, 1);
+                    break;
+                }
+            }
+        }
+
         let data: DDZEventData = new DDZEventData();
         data.player = this;
-        data.dcards = cards;
+        data.dcards = dcards;
+        data.cards = this.cards;
         this._callEvent(this.executeChoiceCardEvent, data);
     }
 
@@ -282,26 +302,36 @@ export class DDZRound {
     // 本轮当前进行的玩家
     private _current: DDZPlayer = null;
 
+    // 事件
+    // 重新开始
+    private _breakEvent: DDZEvent = null;
+    // over
+    private _overEvent: DDZEvent = null;
+
+    /**
+     * 比赛流局重新开始
+     * @param breakEvent 比赛中断流局事件
+     * @param overEvent 比赛结束事件
+     */
+    constructor(breakEvent: DDZEvent, overEvent: DDZEvent) {
+        this._breakEvent = breakEvent;
+        this._overEvent = overEvent;
+
+        this._playerX = new DDZPlayer(this, 1, "x玩家", "", 1000);
+        this._playerY = new DDZPlayer(this, 2, "y玩家", "", 2000);
+        this._playerZ = new DDZPlayer(this, 3, "z玩家", "", 3000);
+    }
+
     /**
      * 初始化
      */
-    public initRound(): void {
-        // new player
-        this._playerX = new DDZPlayer(this, 1, "x玩家", "");
-        this._playerX.agent = true;
-        this._playerX.coin = 1000;
-
-        this._playerY = new DDZPlayer(this, 2, "y玩家", "");
-        this._playerY.agent = true;
-        this._playerY.coin = 2000;
-
-        this._playerZ = new DDZPlayer(this, 3, "z玩家", "");
-        this._playerZ.owner = true;
-        this._playerZ.coin = 3000;
-
-        // 清空玩家
+    public init(): void {
         this._first = null;
         this._current = null;
+
+        this._playerX.init(false, true);
+        this._playerY.init(false, true);
+        this._playerZ.init(true, false);
     }
 
     /**
@@ -402,7 +432,13 @@ export class DDZRound {
             let nextPlayer = this._nextPlayer(player);
             // 全部抢完，找抢的最高分玩家，且设置成地主
             if (this._isSamePlayer(this._first, nextPlayer)) {
-                this.createLord(highestPlayer);
+                // 都不叫就流局重新开始
+                if (highestPlayer.score == 0) {
+                    this._callEvent(this._breakEvent);
+                }
+                else {
+                    this.createLord(highestPlayer);
+                }
             }
             else {
                 // 继续下一个玩家抢地主
@@ -469,14 +505,32 @@ export class DDZRound {
     /**
      * 执行选择出牌
      * @param player 
-     * @param cards 
+     * @param dcards 
      */
-    public executeChoiceCard(player: DDZPlayer, cards: Array<number>): void {
-        player.executeChoiceCard(cards);
+    public executeChoiceCard(player: DDZPlayer, dcards: Array<number>): void {
+        player.executeChoiceCard(dcards);
 
+        // 本轮结束
+        if (player.cards.length == 0) {
+            this._callEvent(this._overEvent);
+        }
         // 下一个玩家选择牌
-        let nextPlayer = this._nextPlayer(player);
-        this.choiceCard(nextPlayer, cards);
+        else {
+            let nextPlayer = this._nextPlayer(player);
+            this.choiceCard(nextPlayer, dcards);
+        }
+    }
+
+    /**
+     * 执行事件
+     * @param event 
+     * @param data 
+     */
+    private _callEvent(event: DDZEvent, data?: DDZEventData): void {
+        if (event) {
+            console.log(`Round event: ${event.name} data:${data ? data.tostring() : "null"}`);
+            event.handler.call(event.context, data);
+        }
     }
 
     /**

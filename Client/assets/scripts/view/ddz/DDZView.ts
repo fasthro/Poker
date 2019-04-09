@@ -3,6 +3,7 @@ import Cards from "../../game/Cards";
 import DDZHeadCom from "../../game/ddz/component/DDZHeadCom";
 import DDZBehaviorCom from "../../game/ddz/component/DDZBehaviorCom";
 import DDZString from "../../language/DDZString";
+import DDZ = require("../../game/ddz/DDZ");
 
 
 /*
@@ -321,7 +322,13 @@ export default class DDZView extends cc.Component {
      * @param customEventData 
      */
     private onClickChoiceCardDiscard(event, customEventData): void {
-        this._controller.round.executeChoiceCard(this._controller.round.playerZ, this.cards.getDequeueCards());
+        let dcards = this.cards.getDequeueCards();
+        if (DDZ.Core.validateRule(dcards)) {
+            this._controller.round.executeChoiceCard(this._controller.round.playerZ, dcards);
+        }
+        else {
+            console.log("不符合出牌规则");
+        }
     }
 
     /**

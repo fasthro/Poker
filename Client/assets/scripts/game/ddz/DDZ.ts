@@ -282,11 +282,18 @@ module DDZ {
                     return 0;
             }
 
+            let start: number = 0;
+
             // 33355
-            if (c1 == c2 && c2 == c3 && c4 == c5) {
-                return this.unAbsoluteCard(ncs[0]);
+            if (c1 == c3 && c4 == c5) {
+                start = this.unAbsoluteCard(ncs[0]);
             }
-            return 0;
+
+            // 33-444
+            if (c1 == c2 && c3 == c5) {
+                start = this.unAbsoluteCard(ncs[0]);
+            }
+            return start;
         }
 
         /**
@@ -306,11 +313,17 @@ module DDZ {
             let c3 = Math.floor(ncs[2] / 4);
             let c4 = Math.floor(ncs[3] / 4);
 
-            // 3335
+            let start: number = 0;
+
+            // 333-5
             if (c1 == c2 && c2 == c3) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
-            return 0;
+            // 3-444
+            if (c2 == c3 && c3 == c4) {
+                start = this.unAbsoluteCard(ncs[0]);
+            }
+            return start;
         }
 
         /**
@@ -319,12 +332,12 @@ module DDZ {
          * @returns 0 - 不是顺子,abs - 顺子起始牌值(比如34567,返回3,用于比较大小)
          */
         public static isStraight(cards: Array<number>): number {
-            if (cards.length != 5)
+            if (cards.length < 5)
                 return 0;
 
             let ncs = this.absoluteCards(this.copyCards(cards));
             ncs.sort();
-
+            console.log(ncs);
             // 最低3开头, 最高 A 结尾
             if (ncs[0] > 11 && ncs[ncs.length - 1] < 60) {
                 for (let i = 0; i < ncs.length - 1; i++) {
@@ -1524,13 +1537,13 @@ module DDZ {
                 return -2;
             }
 
-             // 十二带八
-             ostart = this.isTwelveEight(ocards);
-             if (ostart > 0) {
-                 dstart = this.isTwelveEight(ocards);
-                 if (dstart > 0) return this._compareStart(ostart, dstart);
-                 return -2;
-             }
+            // 十二带八
+            ostart = this.isTwelveEight(ocards);
+            if (ostart > 0) {
+                dstart = this.isTwelveEight(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
 
             return -2;
         }

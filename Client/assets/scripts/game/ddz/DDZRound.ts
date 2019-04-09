@@ -236,7 +236,7 @@ export class DDZPlayer {
 
         // 托管随机抢
         if (this.agent) {
-            this._round.executeChoiceCard(this, [this._cards[0], this._cards[1], this._cards[2]]);
+            this._round.executeChoiceCard(this, []);
         }
     }
 

@@ -15,9 +15,15 @@ export default class DDZBehaviorCom extends cc.Component {
     // 分数 node
     @property(cc.Node)
     public scoreNode: cc.Node = null;
-    // 分数文本
-    @property(cc.Label)
-    public scoreLabel: cc.Label = null;
+    // 1分
+    @property(cc.Node)
+    public scoreNode1: cc.Node = null;
+    // 2分
+    @property(cc.Node)
+    public scoreNode2: cc.Node = null;
+    // 3分
+    @property(cc.Node)
+    public scoreNode3: cc.Node = null;
 
     // 弹窗 node
     @property(cc.Node)
@@ -64,7 +70,11 @@ export default class DDZBehaviorCom extends cc.Component {
      */
     public setScore(active: boolean, score?: number): void {
         this.scoreNode.active = active;
-        if (score) this.scoreLabel.string = score.toString();
+        if(score){
+            this.scoreNode1.active = score == 1;
+            this.scoreNode2.active = score == 2;
+            this.scoreNode3.active = score == 3;
+        }
     }
 
     /**

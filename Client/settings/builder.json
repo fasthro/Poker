@@ -29,7 +29,7 @@
     "portrait": false,
     "upsideDown": false
   },
-  "packageName": "org.cocos2d.Client",
+  "packageName": "com.fasthro.poker",
   "qqplay": {
     "REMOTE_SERVER_ROOT": "",
     "orientation": "portrait",

@@ -25,8 +25,8 @@ export class DDZEventData {
         wcards:${this.wcards ? this.wcards : "null"} 
         ocards:${this.ocards ? this.ocards : "null"}
         dcards:${this.dcards ? this.dcards : "null"}
-        dcards:${this.minScore ? this.minScore : "null"}
-        dcards:${this.choiceScore ? this.choiceScore : "null"}`
+        minScore:${this.minScore ? this.minScore : "null"}
+        choiceScore:${this.choiceScore ? this.choiceScore : "null"}`
     }
 }
 
@@ -46,7 +46,7 @@ export class DDZPlayer {
     // round
     private _round: DDZRound = null;
 
-    // 玩家名称
+    // 玩家id
     private readonly _id: number = 0;
     public get id(): number { return this._id; }
 
@@ -66,7 +66,6 @@ export class DDZPlayer {
     // 是否为地主
     private _isLord: boolean = false;
     public get isLord(): boolean { return this._isLord; }
-    public set isLord(value) { this._isLord = value; }
 
     // 是否托管代理
     private _agent: boolean = false;
@@ -101,6 +100,10 @@ export class DDZPlayer {
     public get owner(): boolean { return this._owner; }
     public set owner(value) { this._owner = value; }
 
+    // 连胜次数
+    private _winCount: number = 0;
+    public get winCount(): number { return this._winCount; }
+
     // 准备
     public readyEvent: DDZEvent = null;
     // 发牌
@@ -127,6 +130,7 @@ export class DDZPlayer {
         this._name = name;
         this._head = head;
         this._coin = coin;
+        this._winCount = 0;
     }
 
     /**
@@ -142,6 +146,7 @@ export class DDZPlayer {
         this._wcards = [];
         this._dcards = [];
         this._pcards = [];
+        this._score = 0;
     }
 
     /**
@@ -204,6 +209,7 @@ export class DDZPlayer {
      * @param cards 底牌
      */
     public createLord(wcards: Array<number>): void {
+        this._isLord = true;
         this._wcards = wcards;
         for (let i = 0; i < wcards.length; i++) {
             this.cards.push(wcards[i]);
@@ -257,6 +263,23 @@ export class DDZPlayer {
     }
 
     /**
+     * 本轮结束
+     * @param win 是否胜利
+     * @param coin 结算金coin
+     */
+    public overRound(win: boolean, coin: number): void {
+        if (win) {
+            this._winCount++;
+            this._coin += this._isLord ? coin * 2 : coin;
+        }
+        else {
+            this._winCount = 0;
+            this._coin -= this._isLord ? coin * 2 : coin;
+            if (this._coin <= 0) this._coin = 0;
+        }
+    }
+
+    /**
      * 执行事件
      * @param event 
      * @param data 
@@ -297,6 +320,14 @@ export class DDZRound {
     private _wcards: Array<number> = [];
     public get wcards(): Array<number> { return this._wcards; }
 
+    // 底分
+    private _score: number = 0;
+    public get score(): number { return this._score };
+
+    // 倍数
+    private _multiple: number = 0;
+    public get multiple(): number { return this._multiple };
+
     // 本轮开始的玩家
     private _first: DDZPlayer = null;
     // 本轮当前进行的玩家
@@ -310,10 +341,12 @@ export class DDZRound {
 
     /**
      * 比赛流局重新开始
+     * @param score 底分
      * @param breakEvent 比赛中断流局事件
      * @param overEvent 比赛结束事件
      */
-    constructor(breakEvent: DDZEvent, overEvent: DDZEvent) {
+    constructor(score: number, breakEvent: DDZEvent, overEvent: DDZEvent) {
+        this._score = score;
         this._breakEvent = breakEvent;
         this._overEvent = overEvent;
 
@@ -326,6 +359,7 @@ export class DDZRound {
      * 初始化
      */
     public init(): void {
+        this._multiple = 0;
         this._first = null;
         this._current = null;
 
@@ -464,9 +498,12 @@ export class DDZRound {
         this._first = null;
         this._current = null;
 
+        // 记录倍数
+        this._multiple = player.score;
+
         player.createLord(this.wcards)
 
-        // 先择出牌
+        // 选择出牌
         this.choiceCard(player, []);
     }
 
@@ -512,13 +549,47 @@ export class DDZRound {
 
         // 本轮结束
         if (player.cards.length == 0) {
-            this._callEvent(this._overEvent);
+            this._overRound(player);
         }
         // 下一个玩家选择牌
         else {
             let nextPlayer = this._nextPlayer(player);
             this.choiceCard(nextPlayer, dcards);
         }
+    }
+
+    /**
+     * 本轮结束
+     * @param player 
+     */
+    private _overRound(player: DDZPlayer): void {
+        let coin = this._score * this.multiple;
+        player.overRound(true, coin);
+
+        let nextPlayer1 = this._nextPlayer(player);
+        let nextPlayer2 = this._nextPlayer(player);
+
+        if (player.isLord) {
+            nextPlayer1.overRound(false, coin);
+            nextPlayer2.overRound(false, coin);
+        }
+        else {
+            if (nextPlayer1.isLord) {
+                nextPlayer1.overRound(false, coin);
+            }
+            else {
+                nextPlayer1.overRound(true, coin);
+            }
+
+            if (nextPlayer2.isLord) {
+                nextPlayer2.overRound(false, coin);
+            }
+            else {
+                nextPlayer2.overRound(true, coin);
+            }
+        }
+
+        this._callEvent(this._overEvent);
     }
 
     /**

@@ -4,13 +4,10 @@ const { ccclass, property, menu } = cc._decorator;
 @ccclass
 @menu("斗地主/ResultItemCom")
 export default class DDZResultItemCom extends cc.Component {
-    // win node
+    
+    // 地主标志 node
     @property(cc.Node)
-    public winNode: cc.Node = null;
-
-    // lose node
-    @property(cc.Node)
-    public loseNode: cc.Node = null;
+    public lordNode: cc.Node = null;
 
     // 名称
     @property(cc.Label)

@@ -43,7 +43,7 @@ export default class DDZCtroller extends BaseController {
         let breakEvent: DDZEvent = { name: "_onBreakEvent", handler: this._onBreakEvent, context: this };
         let overEvent: DDZEvent = { name: "_onOverEvent", handler: this._onOverEvent, context: this };
         // 创建 Round
-        this._round = new DDZRound(breakEvent, overEvent);
+        this._round = new DDZRound(2, breakEvent, overEvent);
 
         // 绑定事件
         // 准备
@@ -67,6 +67,16 @@ export default class DDZCtroller extends BaseController {
     }
 
     /**
+     * 重新开始游戏
+     */
+    public restart(): void {
+        // Round
+        this._view.initView(this);
+        this._round.init();
+        this._round.ready();
+    }
+
+    /**
      * 比赛中止,流局
      * @param data 
      */
@@ -79,8 +89,7 @@ export default class DDZCtroller extends BaseController {
      * @param data 
      */
     private _onOverEvent(data: DDZEventData): void {
-        console.log("ffffffffffffff");
-        Game.showUI(ControllerType.DDZRusult);
+        Game.showUI(ControllerType.DDZRusult, this._round);
     }
 
     /**

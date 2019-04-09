@@ -50,8 +50,8 @@ export default class MainGame extends cc.Component {
         //     14, 15, 32, 33,
         //     36, 37, 38, 39
         // ];
-        // this.cardsCom.initCards(cards);
-        // console.log(DDZ.Core.isTwelveEight(cards));
+        //this.cardsCom.initCards(cards);
+        //console.log(DDZ.Core.validateBoundy([1, 2, 3, 4], [2, 3, 4, 5, 6]));
     }
 
     update(dt) {

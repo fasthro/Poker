@@ -1,6 +1,35 @@
 /*
  * @Author: fasthro
  * @Description: 斗地主逻辑，负责各种牌型识别判断，洗牌，提示等功能
+ * ******************* 牌型 ****************
+ * 1.单张
+ * 2.对子 isPair
+ * 3.三条 isTripleton
+ * 4.炸弹 isFourBomb
+ * 5.王炸 isKingBomb
+ * 6.三带二 isThreeTwo
+ * 7.三带一 isThreeOne
+ * 8.顺子 isStraight
+ * 9.双顺子 isStraight2
+ * 10.三顺子 isStraight3
+ * 11.四顺子 isStraight4
+ * 12.六带四 isPlaneSixFour
+ * 13.六带二 isPlaneSixTwo
+ * 14.九带六 isPlaneNineSix
+ * 15.九带三 isPlaneNineThree
+ * 16.四带四 isFourFour
+ * 17.四带二 isFourTwo
+ * 18.十二带四 isTwelveFour
+ * 19.十二带八 isTwelveEight
+ * 20.十五带五 isFifteenFive
+ * 21.八带四 isEightFour
+ * 22.八带八 isEightEight
+ * 23.十二带六 isTwelveSix
+ * ********************************************
+ * ******************* 其他方法 ****************
+ * 1.洗牌 disorder
+ * 1.洗牌 deal
+ * ********************************************
  * @Date: 2019-04-03 16:10:29
  */
 module DDZ {
@@ -234,7 +263,7 @@ module DDZ {
          * @param cards 
          * @returns 0 - 不是三带二，abs - 三带二的值(比如33355,返回3的绝对值,用于比较大小)
          */
-        public static isTripletonPair(cards: Array<number>): number {
+        public static isThreeTwo(cards: Array<number>): number {
             if (cards.length != 5)
                 return 0;
 
@@ -265,7 +294,7 @@ module DDZ {
          * @param cards 
          * @returns 0 - 不是三带一，abs - 三带一的值(比如3335,返回3,用于比较大小)
          */
-        public static isTripletonSingle(cards: Array<number>): number {
+        public static isThreeOne(cards: Array<number>): number {
             if (cards.length != 4)
                 return 0;
 
@@ -452,28 +481,30 @@ module DDZ {
             let card9 = Math.floor(ncs[8] / 4);
             let card10 = Math.floor(ncs[9] / 4);
 
+            let start: number = 0;
+
             // 555666-7788
             if (card7 == card8 && card9 == card10
                 && card1 == card3
                 && card4 == card6
                 && card4 - card1 == 1) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 3344-555666
-            else if (card1 == card2 && card3 == card4
+            if (card1 == card2 && card3 == card4
                 && card5 == card7
                 && card8 == card10
                 && card8 - card5 == 1) {
-                return this.unAbsoluteCard(ncs[4]);
+                start = this.unAbsoluteCard(ncs[4]);
             }
             // 33-555666-77
-            else if (card1 == card2 && card9 == card10
+            if (card1 == card2 && card9 == card10
                 && card3 == card5
                 && card6 == card8
                 && card6 - card3 == 1) {
-                return this.unAbsoluteCard(ncs[2]);
+                start = this.unAbsoluteCard(ncs[2]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -497,22 +528,24 @@ module DDZ {
             let card7 = Math.floor(ncs[6] / 4);
             let card8 = Math.floor(ncs[7] / 4);
 
+            let start: number = 0;
+
             // 555666-78
             if (card1 == card3 && card4 == card6
                 && card4 - card1 == 1) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 34-555666
-            else if (card3 == card5 && card6 == card8
+            if (card3 == card5 && card6 == card8
                 && card6 - card3 == 1) {
-                return this.unAbsoluteCard(ncs[2]);
+                start = this.unAbsoluteCard(ncs[2]);
             }
             // 3-555666-7
-            else if (card2 == card4 && card5 == card7
+            if (card2 == card4 && card5 == card7
                 && card5 - card2 == 1) {
-                return this.unAbsoluteCard(ncs[1]);
+                start = this.unAbsoluteCard(ncs[1]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -543,39 +576,41 @@ module DDZ {
             let card14 = Math.floor(ncs[13] / 4);
             let card15 = Math.floor(ncs[14] / 4);
 
+            let start: number = 0;
+
             // 555666777-8899JJ
             if (card10 == card11 && card12 == card13 && card14 == card15
                 && card1 == card3
                 && card4 == card6
                 && card7 == card9
                 && card4 - card1 == 1 && card7 - card4 == 1) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 33-555666777-8899
-            else if (card1 == card2 && card12 == card13 && card14 == card15
+            if (card1 == card2 && card12 == card13 && card14 == card15
                 && card3 == card5
                 && card6 == card8
                 && card9 == card11
                 && card6 - card3 == 1 && card9 - card6 == 1) {
-                return this.unAbsoluteCard(ncs[2]);
+                start = this.unAbsoluteCard(ncs[2]);
             }
             // 3344-666777888-99
-            else if (card1 == card2 && card3 == card4 && card14 == card15
+            if (card1 == card2 && card3 == card4 && card14 == card15
                 && card5 == card7
                 && card8 == card10
                 && card11 == card13
                 && card8 - card5 == 1 && card11 - card8 == 1) {
-                return this.unAbsoluteCard(ncs[4]);
+                start = this.unAbsoluteCard(ncs[4]);
             }
             // 334455-666777888
-            else if (card1 == card2 && card3 == card4 && card5 == card6
+            if (card1 == card2 && card3 == card4 && card5 == card6
                 && card7 == card9
                 && card10 == card12
                 && card13 == card15
                 && card10 - card7 == 1 && card13 - card10 == 1) {
-                return this.unAbsoluteCard(ncs[6]);
+                start = this.unAbsoluteCard(ncs[6]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -603,27 +638,29 @@ module DDZ {
             let card11 = Math.floor(ncs[10] / 4);
             let card12 = Math.floor(ncs[11] / 4);
 
+            let start: number = 0;
+
             // 555666777-89J
             if (card1 == card3 && card4 == card6 && card7 == card9
                 && card4 - card1 == 1 && card7 - card4 == 1) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 3-555666777-89
-            else if (card2 == card3 && card5 == card7 && card8 == card10
+            if (card2 == card3 && card5 == card7 && card8 == card10
                 && card5 - card2 == 1 && card8 - card5 == 1) {
-                return this.unAbsoluteCard(ncs[1]);
+                start = this.unAbsoluteCard(ncs[1]);
             }
             // 34-555666777-8
-            else if (card3 == card5 && card6 == card8 && card9 == card11
+            if (card3 == card5 && card6 == card8 && card9 == card11
                 && card6 - card3 == 1 && card9 - card6 == 1) {
-                return this.unAbsoluteCard(ncs[2]);
+                start = this.unAbsoluteCard(ncs[2]);
             }
             // 344-555666777
-            else if (card4 == card6 && card7 == card9 && card10 == card12
+            if (card4 == card6 && card7 == card9 && card10 == card12
                 && card7 - card4 == 1 && card10 - card7 == 1) {
-                return this.unAbsoluteCard(ncs[3]);
+                start = this.unAbsoluteCard(ncs[3]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -647,19 +684,21 @@ module DDZ {
             let card7 = Math.floor(ncs[6] / 4);
             let card8 = Math.floor(ncs[7] / 4);
 
+            let start: number = 0;
+
             // 5555-6677
             if (card1 == card4 && card5 == card6 && card7 == card8) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 33-5555-77
-            else if (card3 == card6 && card1 == card2 && card7 == card8) {
-                return this.unAbsoluteCard(ncs[2]);
+            if (card3 == card6 && card1 == card2 && card7 == card8) {
+                start = this.unAbsoluteCard(ncs[2]);
             }
             // 3344-5555
-            else if (card5 == card8 && card1 == card2 && card3 == card4) {
-                return this.unAbsoluteCard(ncs[4]);
+            if (card5 == card8 && card1 == card2 && card3 == card4) {
+                start = this.unAbsoluteCard(ncs[4]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -681,19 +720,21 @@ module DDZ {
             let card5 = Math.floor(ncs[4] / 4);
             let card6 = Math.floor(ncs[5] / 4);
 
+            let start: number = 0;
+
             // 5555-67
             if (card1 == card4) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 4-5555-6
-            else if (card2 == card5) {
-                return this.unAbsoluteCard(ncs[1]);
+            if (card2 == card5) {
+                start = this.unAbsoluteCard(ncs[1]);
             }
             // 34-5555
-            else if (card3 == card6) {
-                return this.unAbsoluteCard(ncs[2]);
+            if (card3 == card6) {
+                start = this.unAbsoluteCard(ncs[2]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -725,6 +766,8 @@ module DDZ {
             let card15 = Math.floor(ncs[11] / 4);
             let card16 = Math.floor(ncs[11] / 4);
 
+            let start: number = 0;
+
             // 555666777888-9JQK
             if (card1 == card3
                 && card4 == card6
@@ -733,49 +776,49 @@ module DDZ {
                 && card4 - card1 == 1
                 && card7 - card4 == 1
                 && card10 - card7 == 1) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 4-555666777888-JQK
-            else if (card2 == card4
+            if (card2 == card4
                 && card5 == card7
                 && card8 == card10
                 && card11 == card13
                 && card5 - card2 == 1
                 && card8 - card5 == 1
                 && card11 - card8 == 1) {
-                return this.unAbsoluteCard(ncs[1]);
+                start = this.unAbsoluteCard(ncs[1]);
             }
             // 44-555666777888-QK
-            else if (card3 == card5
+            if (card3 == card5
                 && card6 == card8
                 && card9 == card11
                 && card12 == card13
                 && card6 - card3 == 1
                 && card9 - card6 == 1
                 && card12 - card9 == 1) {
-                return this.unAbsoluteCard(ncs[2]);
+                start = this.unAbsoluteCard(ncs[2]);
             }
             // 344-555666777888-K
-            else if (card4 == card6
+            if (card4 == card6
                 && card7 == card9
                 && card10 == card12
                 && card13 == card15
                 && card7 - card4 == 1
                 && card10 - card7 == 1
                 && card13 - card10 == 1) {
-                return this.unAbsoluteCard(ncs[3]);
+                start = this.unAbsoluteCard(ncs[3]);
             }
             // 3344-555666777888
-            else if (card5 == card7
+            if (card5 == card7
                 && card8 == card10
                 && card11 == card13
                 && card14 == card16
                 && card8 - card5 == 1
                 && card11 - card8 == 1
                 && card14 - card11 == 1) {
-                return this.unAbsoluteCard(ncs[4]);
+                start = this.unAbsoluteCard(ncs[4]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -811,6 +854,8 @@ module DDZ {
             let card19 = Math.floor(ncs[11] / 4);
             let card20 = Math.floor(ncs[11] / 4);
 
+            let start: number = 0;
+
             // 555666777888-99JJQQKK
             if (card1 == card3
                 && card4 == card6
@@ -823,10 +868,10 @@ module DDZ {
                 && card15 == card16
                 && card17 == card18
                 && card19 == card20) {
-                return this.unAbsoluteCard(ncs[0]);
+                start = this.unAbsoluteCard(ncs[0]);
             }
             // 44-555666777888-JJQQKK
-            else if (card3 == card5
+            if (card3 == card5
                 && card6 == card8
                 && card9 == card11
                 && card12 == card14
@@ -837,10 +882,10 @@ module DDZ {
                 && card15 == card16
                 && card17 == card18
                 && card19 == card20) {
-                return this.unAbsoluteCard(ncs[2]);
+                start = this.unAbsoluteCard(ncs[2]);
             }
             // 3344-555666777888-QQKK
-            else if (card5 == card7
+            if (card5 == card7
                 && card8 == card10
                 && card11 == card13
                 && card14 == card16
@@ -851,10 +896,10 @@ module DDZ {
                 && card3 == card4
                 && card17 == card18
                 && card19 == card20) {
-                return this.unAbsoluteCard(ncs[4]);
+                start = this.unAbsoluteCard(ncs[4]);
             }
             // 333344-555666777888-KK
-            else if (card7 == card9
+            if (card7 == card9
                 && card10 == card12
                 && card13 == card15
                 && card16 == card18
@@ -865,10 +910,10 @@ module DDZ {
                 && card3 == card4
                 && card5 == card6
                 && card19 == card20) {
-                return this.unAbsoluteCard(ncs[6]);
+                start = this.unAbsoluteCard(ncs[6]);
             }
             // 33334444-555666777888
-            else if (card9 == card11
+            if (card9 == card11
                 && card12 == card14
                 && card15 == card17
                 && card18 == card20
@@ -879,9 +924,9 @@ module DDZ {
                 && card3 == card4
                 && card5 == card6
                 && card7 == card8) {
-                return this.unAbsoluteCard(ncs[8]);
+                start = this.unAbsoluteCard(ncs[8]);
             }
-            return 0;
+            return start;
         }
 
         /**
@@ -916,7 +961,604 @@ module DDZ {
             let card18 = Math.floor(ncs[17] / 4);
             let card19 = Math.floor(ncs[18] / 4);
             let card20 = Math.floor(ncs[19] / 4);
-            
+
+            let start: number = 0;
+
+            // 555666777888999-JJQQK
+            if (card1 == card3
+                && card4 == card6
+                && card7 == card9
+                && card10 == card12
+                && card13 == card15
+                && card4 - card1 == 1
+                && card7 - card4 == 1
+                && card10 - card7 == 1
+                && card13 - card10 == 1) {
+                start = this.unAbsoluteCard(ncs[0]);
+            }
+            // 4-555666777888999-JJQQ
+            if (card2 == card4
+                && card5 == card7
+                && card8 == card10
+                && card11 == card13
+                && card14 == card16
+                && card5 - card2 == 1
+                && card8 - card5 == 1
+                && card11 - card8 == 1
+                && card14 - card11 == 1) {
+                start = this.unAbsoluteCard(ncs[1]);
+            }
+            // 44-555666777888999-JJQ
+            if (card3 == card5
+                && card6 == card8
+                && card9 == card11
+                && card12 == card14
+                && card15 == card17
+                && card6 - card3 == 1
+                && card9 - card6 == 1
+                && card12 - card9 == 1
+                && card15 - card12 == 1) {
+                start = this.unAbsoluteCard(ncs[2]);
+            }
+            // 344-555666777888999-JJ
+            if (card4 == card7
+                && card7 == card9
+                && card10 == card12
+                && card13 == card15
+                && card16 == card18
+                && card7 - card4 == 1
+                && card10 - card7 == 1
+                && card13 - card10 == 1
+                && card16 - card13 == 1) {
+                start = this.unAbsoluteCard(ncs[3]);
+            }
+            // 3344-555666777888999-J
+            if (card5 == card8
+                && card8 == card10
+                && card11 == card13
+                && card14 == card16
+                && card17 == card19
+                && card8 - card5 == 1
+                && card11 - card8 == 1
+                && card14 - card11 == 1
+                && card17 - card14 == 1) {
+                start = this.unAbsoluteCard(ncs[4]);
+            }
+            // 33344-555666777888999
+            if (card6 == card9
+                && card9 == card11
+                && card12 == card14
+                && card15 == card17
+                && card18 == card20
+                && card9 - card6 == 1
+                && card12 - card9 == 1
+                && card15 - card12 == 1
+                && card18 - card15 == 1) {
+                start = this.unAbsoluteCard(ncs[5]);
+            }
+            return start;
+        }
+
+        /**
+         * 是不是八带四
+         * @param cards 
+         * @returns 0 - 不是八带四,abs - 八带四起始牌值(比如555566667788,返回5,用于比较大小)
+         */
+        public static isEightFour(cards: Array<number>): number {
+            if (cards.length != 12)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+
+            let start = 0;
+
+            // 55556666-789J
+            if (card1 == card4
+                && card5 == card8
+                && card5 - card1 == 1) {
+                start = this.unAbsoluteCard(ncs[0]);
+            }
+            // 34-55556666-78
+            if (card3 == card6
+                && card7 == card10
+                && card7 - card3 == 1) {
+                start = this.unAbsoluteCard(ncs[2]);
+            }
+            // 3344-55556666
+            if (card5 == card8
+                && card9 == card12
+                && card9 - card5 == 1) {
+                start = this.unAbsoluteCard(ncs[4]);
+            }
+
+            return start;
+        }
+
+        /**
+         * 是不是八带八
+         * @param cards 
+         * @returns 0 - 不是八带八,abs - 八带八起始牌值(比如55556666778899JJ,返回5,用于比较大小)
+         */
+        public static isEightEight(cards: Array<number>): number {
+            if (cards.length != 16)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[12] / 4);
+            let card14 = Math.floor(ncs[13] / 4);
+            let card15 = Math.floor(ncs[14] / 4);
+            let card16 = Math.floor(ncs[15] / 4);
+
+            let start = 0;
+
+            // 55556666-778899JJ
+            if (card1 == card4
+                && card5 == card8
+                && card5 - card1 == 1
+                && card9 == card10
+                && card11 == card12
+                && card13 == card14
+                && card15 == card16) {
+                start = this.unAbsoluteCard(ncs[0]);
+            }
+            // 44-55556666-778899
+            if (card3 == card6
+                && card7 == card10
+                && card7 - card3 == 1
+                && card1 == card2
+                && card11 == card12
+                && card13 == card14
+                && card15 == card16) {
+                start = this.unAbsoluteCard(ncs[2]);
+            }
+            // 3344-55556666-7788
+            if (card5 == card8
+                && card9 == card12
+                && card9 - card5 == 1
+                && card1 == card2
+                && card3 == card4
+                && card13 == card14
+                && card15 == card16) {
+                start = this.unAbsoluteCard(ncs[4]);
+            }
+            // 333344-55556666-77
+            if (card7 == card10
+                && card11 == card14
+                && card11 - card7 == 1
+                && card1 == card2
+                && card3 == card4
+                && card5 == card6
+                && card15 == card16) {
+                start = this.unAbsoluteCard(ncs[6]);
+            }
+            // 22333344-55556666
+            if (card9 == card12
+                && card13 == card16
+                && card13 - card9 == 1
+                && card1 == card2
+                && card3 == card4
+                && card5 == card6
+                && card7 == card8) {
+                start = this.unAbsoluteCard(ncs[8]);
+            }
+
+            return start;
+        }
+
+        /**
+         * 是不是十二带六
+         * @param cards 
+         * @returns 0 - 不是十二带六,abs - 十二带六起始牌值(比如5555666677778899JJ,返回5,用于比较大小)
+         */
+        public static isTwelveSix(cards: Array<number>): number {
+            if (cards.length != 16)
+                return 0;
+
+            let ncs = this.absoluteCards(this.copyCards(cards));
+            ncs.sort();
+
+            let card1 = Math.floor(ncs[0] / 4);
+            let card2 = Math.floor(ncs[1] / 4);
+            let card3 = Math.floor(ncs[2] / 4);
+            let card4 = Math.floor(ncs[3] / 4);
+            let card5 = Math.floor(ncs[4] / 4);
+            let card6 = Math.floor(ncs[5] / 4);
+            let card7 = Math.floor(ncs[6] / 4);
+            let card8 = Math.floor(ncs[7] / 4);
+            let card9 = Math.floor(ncs[8] / 4);
+            let card10 = Math.floor(ncs[9] / 4);
+            let card11 = Math.floor(ncs[10] / 4);
+            let card12 = Math.floor(ncs[11] / 4);
+            let card13 = Math.floor(ncs[12] / 4);
+            let card14 = Math.floor(ncs[13] / 4);
+            let card15 = Math.floor(ncs[14] / 4);
+            let card16 = Math.floor(ncs[15] / 4);
+            let card17 = Math.floor(ncs[16] / 4);
+            let card18 = Math.floor(ncs[17] / 4);
+
+            let start: number = 0;
+
+            // 555566667777-8899JJ
+            if (card1 == card4
+                && card5 == card8
+                && card9 == card12
+                && card5 - card1 == 1
+                && card9 - card5 == 1
+                && card13 == card14
+                && card15 == card16
+                && card17 == card18) {
+                start = this.unAbsoluteCard(ncs[0]);
+            }
+            // 44-555566667777-8899
+            if (card3 == card6
+                && card7 == card10
+                && card11 == card14
+                && card7 - card3 == 1
+                && card11 - card7 == 1
+                && card1 == card2
+                && card15 == card16
+                && card17 == card18) {
+                start = this.unAbsoluteCard(ncs[2]);
+            }
+            // 3344-555566667777-88
+            if (card5 == card8
+                && card9 == card12
+                && card13 == card16
+                && card9 - card5 == 1
+                && card13 - card9 == 1
+                && card1 == card2
+                && card3 == card4
+                && card17 == card18) {
+                start = this.unAbsoluteCard(ncs[4]);
+            }
+            // 223344-555566667777
+            if (card7 == card10
+                && card11 == card14
+                && card15 == card18
+                && card11 - card7 == 1
+                && card15 - card11 == 1
+                && card1 == card2
+                && card3 == card4
+                && card5 == card6) {
+                start = this.unAbsoluteCard(ncs[6]);
+            }
+
+            return start;
+        }
+
+        /**
+         * 验证cards 是否在 boundyCards 范围内
+         * @param cards 
+         * @param boundyCards 
+         */
+        public static validateBoundy(cards: Array<number>, boundyCards: Array<number>): boolean {
+            if (!cards || cards.length == 0) return true;
+            if (!boundyCards) return false;
+
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i] > 55 || cards[i] < 2) return false;
+                let isFind: boolean = false;
+                for (let k = 0; k < boundyCards.length; k++) {
+                    if (cards[i] == boundyCards[k]) {
+                        isFind = true;
+                        break;
+                    }
+                }
+                if (!isFind) return false;
+            }
+            return true;
+        }
+
+        /**
+         * 验证 cards 是否符合牌型规则
+         * @param cards 
+         */
+        public static validateRule(cards: Array<number>): boolean {
+            if (!cards) return false;
+            let length: number = cards.length;
+            // 单张
+            if (length == 1) {
+                return true;
+            }
+            // 对子/王炸
+            else if (length == 2 && (this.isPair(cards) || this.isKingBomb(cards))) {
+                return true;
+            }
+            // 三条
+            else if (length == 3 && this.isTripleton(cards)) {
+                return true;
+            }
+            // 三带一/普通炸
+            else if (length == 4 && (this.isThreeOne(cards) > 0 || this.isFourBomb(cards))) {
+                return true;
+            }
+            // 三带二
+            else if (length == 5 && this.isThreeTwo(cards) > 0) {
+                return true;
+            }
+            // 四带二
+            else if (length == 6 && this.isFourTwo(cards) > 0) {
+                return true;
+            }
+            // 四带四/六带二
+            else if (length == 8 && (this.isFourFour(cards) > 0 || this.isPlaneSixTwo(cards) > 0)) {
+                return true;
+            }
+            // 六带四
+            else if (length == 10 && this.isPlaneSixFour(cards) > 0) {
+                return true;
+            }
+            // 单顺/双顺/三顺/四顺
+            else if (length > 4 && (this.isStraight(cards) > 0 || this.isStraight2(cards) > 0 || this.isStraight3(cards) > 0 || this.isStraight4(cards) > 0)) {
+                return true;
+            }
+            // 九带三/八带四
+            else if (length == 12 && (this.isPlaneNineThree(cards) > 0 || this.isEightFour(cards) > 0)) {
+                return true;
+            }
+            // 九带六
+            else if (length == 15 && this.isPlaneNineSix(cards) > 0) {
+                return true;
+            }
+            // 八带八/十二带四
+            else if (length == 16 && (this.isPlaneNineSix(cards) > 0 || this.isTwelveFour(cards) > 0)) {
+                return true;
+            }
+            // 十二带六
+            else if (length == 18 && this.isTwelveSix(cards) > 0) {
+                return true;
+            }
+            // 十五带五
+            else if (length == 20 && (this.isFifteenFive(cards) > 0) || this.isTwelveEight(cards) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * 比较牌大小
+         * @param ocards 对手的牌
+         * @param dcards 自己要出的牌
+         * @returns 0 dcards = ocards, 1 dcards > ocards, -1 dcards < ocards, -2 不符合出牌规则
+         */
+        public static compareCards(ocards: Array<number>, dcards: Array<number>): number {
+            if (!ocards || ocards.length == 0) {
+                if (this.validateRule(dcards)) {
+                    return 1;
+                }
+                return -2;
+            }
+
+            // 炸弹
+            if (!this.isBomb(ocards) && this.isBomb(dcards)) {
+                return 1;
+            }
+            else if (this.isBomb(ocards) && this.isBomb(dcards)) {
+                if (this.isKingBomb(dcards)) {
+                    return 1;
+                }
+                else {
+                    if (ocards[0] > dcards[0]) {
+                        return -1;
+                    }
+                    else if (ocards[0] < dcards[0]) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                }
+            }
+            else if (this.isBomb(ocards) && !this.isBomb(dcards)) {
+                return -2;
+            }
+
+            // 牌数
+            if (ocards.length != dcards.length) return -2;
+
+            // 单张
+            if (ocards.length == 1) {
+                return this._compareSingleCard(ocards[0], dcards[0]);
+            }
+
+            // 对子
+            if (this.isPair(ocards)) {
+                if (!this.isPair(dcards)) return -2;
+                return this._compareSingleCard(ocards[0], dcards[0]);
+            }
+
+            // 三条
+            if (this.isTripleton(ocards)) {
+                if (!this.isPair(dcards)) return -2;
+                return this._compareSingleCard(ocards[0], dcards[0]);
+            }
+
+            let ostart = 0;
+            let dstart = 0;
+
+            // 三带一
+            ostart = this.isThreeOne(ocards);
+            if (ostart > 0) {
+                dstart = this.isThreeOne(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 三带二
+            ostart = this.isThreeTwo(ocards);
+            if (ostart > 0) {
+                dstart = this.isThreeTwo(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 四带二
+            ostart = this.isFourTwo(ocards);
+            if (ostart > 0) {
+                dstart = this.isFourTwo(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 四带四
+            ostart = this.isFourFour(ocards);
+            if (ostart > 0) {
+                dstart = this.isFourFour(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 六带二
+            ostart = this.isPlaneSixTwo(ocards);
+            if (ostart > 0) {
+                dstart = this.isPlaneSixTwo(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 六带四
+            ostart = this.isPlaneSixFour(ocards);
+            if (ostart > 0) {
+                dstart = this.isPlaneSixFour(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 单顺
+            ostart = this.isStraight(ocards);
+            if (ostart > 0) {
+                dstart = this.isStraight(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 双顺
+            ostart = this.isStraight2(ocards);
+            if (ostart > 0) {
+                dstart = this.isStraight2(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 三顺
+            ostart = this.isStraight3(ocards);
+            if (ostart > 0) {
+                dstart = this.isStraight3(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 四顺
+            ostart = this.isStraight4(ocards);
+            if (ostart > 0) {
+                dstart = this.isStraight4(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 九带三
+            ostart = this.isPlaneNineThree(ocards);
+            if (ostart > 0) {
+                dstart = this.isPlaneNineThree(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 九带六
+            ostart = this.isPlaneNineSix(ocards);
+            if (ostart > 0) {
+                dstart = this.isPlaneNineSix(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 八带四
+            ostart = this.isEightFour(ocards);
+            if (ostart > 0) {
+                dstart = this.isEightFour(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 八带八
+            ostart = this.isEightEight(ocards);
+            if (ostart > 0) {
+                dstart = this.isEightEight(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+            // 十二带四
+            ostart = this.isTwelveFour(ocards);
+            if (ostart > 0) {
+                dstart = this.isTwelveFour(ocards);
+                if (dstart > 0) return this._compareStart(ostart, dstart);
+                return -2;
+            }
+
+             // 十二带八
+             ostart = this.isTwelveEight(ocards);
+             if (ostart > 0) {
+                 dstart = this.isTwelveEight(ocards);
+                 if (dstart > 0) return this._compareStart(ostart, dstart);
+                 return -2;
+             }
+
+            return -2;
+        }
+
+        /**
+         * 比较单牌大小
+         * @param ocards 对手的牌
+         * @param dcards 自己要出的牌
+         * @returns 0 dcards = ocards, 1 dcards > ocards, -1 dcards < ocards
+         */
+        private static _compareSingleCard(ocard: number, dcard: number): number {
+            let oc = Math.floor(this.absoluteCard(ocard) / 4);
+            let dc = Math.floor(this.absoluteCard(dcard) / 4);
+            if (oc > dc) return -1;
+            else if (oc < dc) return 1;
+            else return 0;
+        }
+
+        /**
+         * 比较start值大小
+         * @param ostart 对手牌的Start
+         * @param dstart 自己要出牌的Start
+         * @returns 0 dstart = ostart, 1 dstart > ostart, -1 dstart < ostart
+         */
+        private static _compareStart(ostart: number, dstart: number): number {
+            if (ostart > dstart) return -1;
+            else if (ostart < dstart) return 1;
+            else return 0;
         }
 
         /**

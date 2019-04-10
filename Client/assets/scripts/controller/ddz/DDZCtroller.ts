@@ -61,6 +61,9 @@ export default class DDZCtroller extends BaseController {
         // 执行选择出牌
         this._round.bindExecuteChoiceCardEvent({ name: "_onExecuteChoiceCardEvent", handler: this._onExecuteChoiceCardEvent, context: this });
 
+        // 倒计时
+        this._round.bindTimeoutEvent({ name: "_onTimeoutEvent", handler: this._onTimeoutEvent, context: this });
+
         // Round
         this._round.init();
         this._round.ready();
@@ -174,6 +177,16 @@ export default class DDZCtroller extends BaseController {
         if (this._round.isPlayerX(data.player)) this._view.setExecuteChoiceCardX(data.dcards, data.cards);
         else if (this._round.isPlayerY(data.player)) this._view.setExecuteChoiceCardY(data.dcards, data.cards);
         else this._view.setExecuteChoiceCardZ(data.dcards, data.cards);
+    }
+
+     /**
+     * 倒计时
+     * @param data 
+     */
+    private _onTimeoutEvent(data: DDZEventData): void {
+        if (this._round.isPlayerX(data.player)) this._view.setTimeoutX(data.timeout);
+        else if (this._round.isPlayerY(data.player)) this._view.setTimeoutY(data.timeout);
+        else this._view.setTimeoutZ(data.timeout);
     }
 
     public update(dt): void {

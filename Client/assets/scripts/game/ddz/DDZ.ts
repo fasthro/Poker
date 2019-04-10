@@ -13,10 +13,10 @@
  * 9.双顺子 isStraight2
  * 10.三顺子 isStraight3
  * 11.四顺子 isStraight4
- * 12.六带四 isPlaneSixFour
- * 13.六带二 isPlaneSixTwo
- * 14.九带六 isPlaneNineSix
- * 15.九带三 isPlaneNineThree
+ * 12.六带四 isSixFour
+ * 13.六带二 isSixTwo
+ * 14.九带六 isNineSix
+ * 15.九带三 isNineThree
  * 16.四带四 isFourFour
  * 17.四带二 isFourTwo
  * 18.十二带四 isTwelveFour
@@ -28,13 +28,16 @@
  * ********************************************
  * ******************* 其他方法 ****************
  * 1.洗牌 disorder
- * 1.洗牌 deal
+ * 2.洗牌 deal
+ * 3.验证牌边界 validateBoundy
+ * 4.验证牌型 validateRule
+ * 5.比较牌大小 compareCards 
  * ********************************************
  * @Date: 2019-04-03 16:10:29
  */
 module DDZ {
     /**
-     * 核心逻辑
+     * 牌型和基础
      * - 牌的对应关系
      * - 大王 小王 黑桃A 红桃A 草花A 方片A  黑桃2 红桃2 草花2 方片2 黑桃3 红桃3 草花3 方片3 ...
      * -  2    3     4    5    6     7     8     9    10    11    12   13    14    15  ...
@@ -476,7 +479,7 @@ module DDZ {
          * @param cards 
          * @returns 0 - 不是飞机-六带四,abs - 飞机-六带四起始牌值(比如3334445566,返回3,用于比较大小)
          */
-        public static isPlaneSixFour(cards: Array<number>): number {
+        public static isSixFour(cards: Array<number>): number {
             if (cards.length != 10)
                 return 0;
 
@@ -525,7 +528,7 @@ module DDZ {
          * @param cards 
          * @returns 0 - 不是飞机-六带二,abs - 飞机-六带二起始牌值(比如33344456,返回3,用于比较大小)
          */
-        public static isPlaneSixTwo(cards: Array<number>): number {
+        public static isSixTwo(cards: Array<number>): number {
             if (cards.length != 8)
                 return 0;
 
@@ -566,7 +569,7 @@ module DDZ {
          * @param cards 
          * @returns 0 - 不是飞机-九带六,abs - 飞机-九带六起始牌值(比如333444555667788,返回3,用于比较大小)
          */
-        public static isPlaneNineSix(cards: Array<number>): number {
+        public static isNineSix(cards: Array<number>): number {
             if (cards.length != 15)
                 return 0;
 
@@ -631,7 +634,7 @@ module DDZ {
          * @param cards 
          * @returns 0 - 不是飞机-九带三,abs - 飞机-九带三起始牌值(比如333444555678,返回3,用于比较大小)
          */
-        public static isPlaneNineThree(cards: Array<number>): number {
+        public static isNineThree(cards: Array<number>): number {
             if (cards.length != 12)
                 return 0;
 
@@ -1322,11 +1325,11 @@ module DDZ {
                 return true;
             }
             // 四带四/六带二
-            else if (length == 8 && (this.isFourFour(cards) > 0 || this.isPlaneSixTwo(cards) > 0)) {
+            else if (length == 8 && (this.isFourFour(cards) > 0 || this.isSixTwo(cards) > 0)) {
                 return true;
             }
             // 六带四
-            else if (length == 10 && this.isPlaneSixFour(cards) > 0) {
+            else if (length == 10 && this.isSixFour(cards) > 0) {
                 return true;
             }
             // 单顺/双顺/三顺/四顺
@@ -1334,15 +1337,15 @@ module DDZ {
                 return true;
             }
             // 九带三/八带四
-            else if (length == 12 && (this.isPlaneNineThree(cards) > 0 || this.isEightFour(cards) > 0)) {
+            else if (length == 12 && (this.isNineThree(cards) > 0 || this.isEightFour(cards) > 0)) {
                 return true;
             }
             // 九带六
-            else if (length == 15 && this.isPlaneNineSix(cards) > 0) {
+            else if (length == 15 && this.isNineSix(cards) > 0) {
                 return true;
             }
             // 八带八/十二带四
-            else if (length == 16 && (this.isPlaneNineSix(cards) > 0 || this.isTwelveFour(cards) > 0)) {
+            else if (length == 16 && (this.isNineSix(cards) > 0 || this.isTwelveFour(cards) > 0)) {
                 return true;
             }
             // 十二带六
@@ -1450,17 +1453,17 @@ module DDZ {
             }
 
             // 六带二
-            ostart = this.isPlaneSixTwo(ocards);
+            ostart = this.isSixTwo(ocards);
             if (ostart > 0) {
-                dstart = this.isPlaneSixTwo(ocards);
+                dstart = this.isSixTwo(ocards);
                 if (dstart > 0) return this._compareStart(ostart, dstart);
                 return -2;
             }
 
             // 六带四
-            ostart = this.isPlaneSixFour(ocards);
+            ostart = this.isSixFour(ocards);
             if (ostart > 0) {
-                dstart = this.isPlaneSixFour(ocards);
+                dstart = this.isSixFour(ocards);
                 if (dstart > 0) return this._compareStart(ostart, dstart);
                 return -2;
             }
@@ -1498,17 +1501,17 @@ module DDZ {
             }
 
             // 九带三
-            ostart = this.isPlaneNineThree(ocards);
+            ostart = this.isNineThree(ocards);
             if (ostart > 0) {
-                dstart = this.isPlaneNineThree(ocards);
+                dstart = this.isNineThree(ocards);
                 if (dstart > 0) return this._compareStart(ostart, dstart);
                 return -2;
             }
 
             // 九带六
-            ostart = this.isPlaneNineSix(ocards);
+            ostart = this.isNineSix(ocards);
             if (ostart > 0) {
-                dstart = this.isPlaneNineSix(ocards);
+                dstart = this.isNineSix(ocards);
                 if (dstart > 0) return this._compareStart(ostart, dstart);
                 return -2;
             }
@@ -1635,6 +1638,82 @@ module DDZ {
                 ncs.push(cards[i]);
             }
             return ncs;
+        }
+    }
+
+    /**
+     * 出牌提示
+     * - 牌的对应关系
+     * - 3-10 = 3 - 10
+     * - J    = 11
+     * - Q    = 12
+     * - K    = 13
+     * - A    = 14
+     * - 2    = 15
+     * - 小王 = 16
+     * - 大王 = 17
+     */
+    export class Assist {
+        /**
+         * 第一手出牌提示
+         * @param cards 自己手中牌
+         */
+        public static firstDiscard(cards: Array<number>): Array<Array<number>> {
+            return null;
+        }
+
+        /**
+         * 多选只能提示
+         * @param ocards 
+         * @param cards 
+         */
+        public static specialDiscard(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
+            return null;
+        }
+
+
+        /**
+         * 压牌提示
+         * @param ocards 对手出的牌
+         * @param cards 自己手中牌
+         */
+        public static discard(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
+            return null;
+        }
+
+        /**
+         * 补全提示
+         * @param ocards 对手出的牌
+         * @param cards 自己手中牌
+         */
+        public static competion(ocards: Array<number>, cards: Array<number>, dequeueCards: Array<number>): Array<number> {
+            return null;
+        }
+
+        /**
+        * 将外部数据的牌编号,变成内部方便比较大小的绝对值
+        * @param cards 
+        * @returns cards 绝对值
+        */
+        private static _absoluteCard(card: number): number {
+            // 大王
+            if (card == 2) return 17;
+            // 小王
+            else if (card == 3) return 16;
+            // A
+            else if (card <= 7) return 14;
+            // 2
+            else if (card <= 11) return 15;
+            // 3 - 10
+            else return Math.floor(card / 4);
+        }
+
+        /**
+         * 牌型分析(完全不考虑顺子)
+         * @param cards 
+         */
+        private static _analysis(cards: Array<number>): void {
+
         }
     }
 

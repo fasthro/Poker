@@ -70,7 +70,7 @@ export default class DDZBehaviorCom extends cc.Component {
      */
     public setScore(active: boolean, score?: number): void {
         this.scoreNode.active = active;
-        if(score){
+        if (score != null && score != undefined) {
             this.scoreNode1.active = score == 1;
             this.scoreNode2.active = score == 2;
             this.scoreNode3.active = score == 3;
@@ -92,7 +92,7 @@ export default class DDZBehaviorCom extends cc.Component {
      */
     public setCardCount(active: boolean, count?: number): void {
         this.cardCountNode.active = active;
-        if (count) this.cardCountLabel.string = count.toString();
+        if (count != null && count != undefined) this.cardCountLabel.string = count.toString();
     }
 
     /**
@@ -101,7 +101,7 @@ export default class DDZBehaviorCom extends cc.Component {
      */
     public setCountdown(active: boolean, time?: number): void {
         this.countdownNode.active = active;
-        if (time) this.countdownLabel.string = time.toString();
+        if (time != null && time != undefined) this.countdownLabel.string = time.toString();
     }
 
     /**

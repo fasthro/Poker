@@ -17,6 +17,7 @@ export class DDZEventData {
     public dcards?: Array<number>;      // 自己出的牌
     public minScore?: number;           // 可选择的最小分数
     public choiceScore?: number;        // 最终选择的分数
+    public timeout?: number;            // 倒计时
 
     tostring(): string {
         return `
@@ -25,8 +26,9 @@ export class DDZEventData {
         wcards:${this.wcards ? this.wcards : "null"} 
         ocards:${this.ocards ? this.ocards : "null"}
         dcards:${this.dcards ? this.dcards : "null"}
-        minScore:${this.minScore ? this.minScore : "null"}
-        choiceScore:${this.choiceScore ? this.choiceScore : "null"}`
+        minScore:${this.minScore != null || this.minScore != undefined ? this.minScore : "null"}
+        choiceScore:${this.choiceScore != null || this.choiceScore != undefined ? this.choiceScore : "null"}
+        timeout:${this.timeout != null || this.timeout != undefined ? this.timeout : "null"}`
     }
 }
 
@@ -40,9 +42,21 @@ export type DDZEvent = {
 }
 
 /**
+ * 牌操作状态
+ */
+const DDZ_STATE = cc.Enum({
+    CHOICE_SCORE: 0,
+    CHOICE_CARD: 1,
+});
+
+// 托管执行时间
+export const AGENT_TIME: number = 2000;
+
+/**
  * 斗地主 - 玩家数据
  */
 export class DDZPlayer {
+
     // round
     private _round: DDZRound = null;
 
@@ -104,6 +118,11 @@ export class DDZPlayer {
     private _winCount: number = 0;
     public get winCount(): number { return this._winCount; }
 
+    // 倒计时
+    private _timeout: number = 0;
+    // 倒计时handler
+    private _timeoutHandler: number = null;
+
     // 准备
     public readyEvent: DDZEvent = null;
     // 发牌
@@ -118,6 +137,8 @@ export class DDZPlayer {
     public choiceCardEvent: DDZEvent = null;
     // 执行选择出牌
     public executeChoiceCardEvent: DDZEvent = null;
+    // 操作计时
+    public timeoutEvent: DDZEvent = null;
 
     /**
      * 构造方法
@@ -150,6 +171,46 @@ export class DDZPlayer {
     }
 
     /**
+     * 倒计时
+     */
+    private _setTimeout(timeout: number, state: number): void {
+        this._timeout = timeout;
+
+        let data: DDZEventData = new DDZEventData();
+        data.timeout = this._timeout;
+        this._callEvent(this.timeoutEvent, data);
+
+        let self = this;
+        this._clearTimeout();
+        this._timeoutHandler = setInterval(() => {
+            self._timeout--;
+            if (self._timeout < 0) {
+                if (state == DDZ_STATE.CHOICE_SCORE) {
+                    self._round.executeChoiceScore(self, 0);
+                }
+                else if (state == DDZ_STATE.CHOICE_CARD) {
+                    // TODO 第一手必须出牌
+                    self._round.executeChoiceCard(self, []);
+                }
+
+                this._clearTimeout();
+            }
+            else {
+                let data: DDZEventData = new DDZEventData();
+                data.timeout = self._timeout;
+                self._callEvent(this.timeoutEvent, data);
+            }
+        }, 1000);
+    }
+
+    /**
+     * 清空倒计时
+     */
+    private _clearTimeout(): void {
+        if (this._timeoutHandler) clearTimeout(this._timeoutHandler);
+    }
+
+    /**
      * 准备
      */
     public ready(): void {
@@ -176,6 +237,8 @@ export class DDZPlayer {
      * @param minScore 可选择的最小分数
      */
     public choiceScore(minScore: number): void {
+        this._setTimeout(15, DDZ_STATE.CHOICE_SCORE);
+
         let data: DDZEventData = new DDZEventData();
         data.player = this;
         data.minScore = minScore;
@@ -187,7 +250,11 @@ export class DDZPlayer {
             for (let i = 1; i < 4; i++) {
                 if (i > minScore) alternative.push(i);
             }
-            this._round.executeChoiceScore(this, alternative[DDZ.Utils.random(0, alternative.length - 1)]);
+
+            let self = this;
+            setTimeout(() => {
+                this._round.executeChoiceScore(self, alternative[DDZ.Utils.random(0, alternative.length - 1)]);
+            }, AGENT_TIME);
         }
     }
 
@@ -197,6 +264,8 @@ export class DDZPlayer {
      */
     public executeChoiceScore(score: number): void {
         this._score = score;
+
+        this._clearTimeout();
 
         let data: DDZEventData = new DDZEventData();
         data.player = this;
@@ -229,6 +298,8 @@ export class DDZPlayer {
      * @param ocards 
      */
     public choiceCard(ocards: Array<number>): void {
+        this._setTimeout(15, DDZ_STATE.CHOICE_CARD);
+
         let data: DDZEventData = new DDZEventData();
         data.player = this;
         data.ocards = ocards;
@@ -236,7 +307,10 @@ export class DDZPlayer {
 
         // 托管随机抢
         if (this.agent) {
-            this._round.executeChoiceCard(this, []);
+            let self = this;
+            setTimeout(() => {
+                self._round.executeChoiceCard(self, []);
+            }, AGENT_TIME);
         }
     }
 
@@ -245,6 +319,8 @@ export class DDZPlayer {
      * @param dcards 要出去的牌
      */
     public executeChoiceCard(dcards: Array<number>): void {
+        this._clearTimeout();
+
         // 移除出去的牌
         for (let i = 0; i < dcards.length; i++) {
             for (let k = 0; k < this.cards.length; k++) {
@@ -257,7 +333,7 @@ export class DDZPlayer {
 
         let data: DDZEventData = new DDZEventData();
         data.player = this;
-        data.dcards = dcards;
+        data.dcards = DDZ.Core.sortSpecial(dcards);
         data.cards = this.cards;
         this._callEvent(this.executeChoiceCardEvent, data);
     }
@@ -367,6 +443,17 @@ export class DDZRound {
         this._playerY.init(false, true);
         this._playerZ.init(true, false);
     }
+
+    /**
+     * 绑定倒计时事件
+     * @param event 
+     */
+    public bindTimeoutEvent(event: DDZEvent): void {
+        this._playerX.timeoutEvent = event;
+        this._playerY.timeoutEvent = event;
+        this._playerZ.timeoutEvent = event;
+    }
+
 
     /**
      * 绑定准备事件

@@ -28,6 +28,10 @@ export default class DDZView extends cc.Component {
     @property(Cards)
     public wcards: Cards = null;
 
+    // 底牌背面node
+    @property(cc.Node)
+    public wcardBack: cc.Node = null;
+
     // 头像
     @property(DDZHeadCom)
     public headX: DDZHeadCom = null;
@@ -124,6 +128,8 @@ export default class DDZView extends cc.Component {
      */
     public setChoiceScoreX(): void {
         this.choiceScoreNode.active = false;
+        this.behaviorY.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
     }
 
     /**
@@ -131,6 +137,8 @@ export default class DDZView extends cc.Component {
      */
     public setChoiceScoreY(): void {
         this.choiceScoreNode.active = false;
+        this.behaviorX.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
     }
 
     /**
@@ -139,6 +147,8 @@ export default class DDZView extends cc.Component {
      */
     public setChoiceScoreZ(minScore: number): void {
         this.choiceScoreNode.active = true;
+        this.behaviorX.setCountdown(false);
+        this.behaviorY.setCountdown(false);
 
         this.btnChoiceScore1.interactable = minScore <= 1;
         this.btnChoiceScore2.interactable = minScore <= 2;
@@ -179,6 +189,9 @@ export default class DDZView extends cc.Component {
         this.behaviorX.setScore(false);
         this.behaviorY.setScore(false);
         this.behaviorZ.setScore(false);
+        this.behaviorX.setCountdown(false);
+        this.behaviorY.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
         this.headX.setLord(true);
     }
 
@@ -189,6 +202,9 @@ export default class DDZView extends cc.Component {
         this.behaviorX.setScore(false);
         this.behaviorY.setScore(false);
         this.behaviorZ.setScore(false);
+        this.behaviorX.setCountdown(false);
+        this.behaviorY.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
         this.headY.setLord(true);
     }
 
@@ -199,6 +215,9 @@ export default class DDZView extends cc.Component {
         this.behaviorX.setScore(false);
         this.behaviorY.setScore(false);
         this.behaviorZ.setScore(false);
+        this.behaviorX.setCountdown(false);
+        this.behaviorY.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
         this.headZ.setLord(true);
     }
     /**
@@ -207,6 +226,7 @@ export default class DDZView extends cc.Component {
      */
     public setWcard(cards: Array<number>): void {
         this.wcards.initCards(cards);
+        this.wcardBack.active = cards.length == 0;
     }
 
     /**
@@ -215,6 +235,10 @@ export default class DDZView extends cc.Component {
      */
     public setChoiceCardX(): void {
         this.choiceCardNode.active = false;
+        this.behaviorX.setDcard(false);
+        this.behaviorX.setBehavior(false);
+        this.behaviorY.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
     }
 
     /**
@@ -223,6 +247,10 @@ export default class DDZView extends cc.Component {
      */
     public setChoiceCardY(): void {
         this.choiceCardNode.active = false;
+        this.behaviorY.setDcard(false);
+        this.behaviorY.setBehavior(false);
+        this.behaviorX.setCountdown(false);
+        this.behaviorZ.setCountdown(false);
     }
 
     /**
@@ -232,6 +260,10 @@ export default class DDZView extends cc.Component {
      */
     public setChoiceCardZ(active: boolean, ocards?: Array<number>): void {
         this.choiceCardNode.active = true;
+        this.behaviorZ.setDcard(false);
+        this.behaviorZ.setBehavior(false);
+        this.behaviorX.setCountdown(false);
+        this.behaviorY.setCountdown(false);
     }
 
     /**
@@ -285,6 +317,30 @@ export default class DDZView extends cc.Component {
             this.behaviorZ.setDcard(true, dcards);
         }
         this.choiceCardNode.active = false;
+    }
+
+    /**
+     * 设置X倒计时
+     * @param timeout 
+     */
+    public setTimeoutX(timeout: number): void {
+        this.behaviorX.setCountdown(true, timeout);
+    }
+
+    /**
+     * 设置Y倒计时
+     * @param timeout 
+     */
+    public setTimeoutY(timeout: number): void {
+        this.behaviorY.setCountdown(true, timeout);
+    }
+
+    /**
+     * 设置Z倒计时
+     * @param timeout 
+     */
+    public setTimeoutZ(timeout: number): void {
+        this.behaviorZ.setCountdown(true, timeout);
     }
 
     /**

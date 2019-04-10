@@ -257,9 +257,11 @@ export default class DDZView extends cc.Component {
      * 设置Z选择出牌
      * @param active 
      * @param ocard 对手牌
+     * @param ocard 强制出牌
      */
-    public setChoiceCardZ(active: boolean, ocards?: Array<number>): void {
+    public setChoiceCardZ(active: boolean, ocards?: Array<number>, force?: boolean): void {
         this.choiceCardNode.active = true;
+        this.btnPass.interactable = !force;
         this.behaviorZ.setDcard(false);
         this.behaviorZ.setBehavior(false);
         this.behaviorX.setCountdown(false);

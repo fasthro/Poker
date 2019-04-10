@@ -18,6 +18,8 @@ export class DDZEventData {
     public minScore?: number;           // 可选择的最小分数
     public choiceScore?: number;        // 最终选择的分数
     public timeout?: number;            // 倒计时
+    public force?: boolean;             // 强制出牌
+
 
     tostring(): string {
         return `
@@ -28,7 +30,8 @@ export class DDZEventData {
         dcards:${this.dcards ? this.dcards : "null"}
         minScore:${this.minScore != null || this.minScore != undefined ? this.minScore : "null"}
         choiceScore:${this.choiceScore != null || this.choiceScore != undefined ? this.choiceScore : "null"}
-        timeout:${this.timeout != null || this.timeout != undefined ? this.timeout : "null"}`
+        timeout:${this.timeout != null || this.timeout != undefined ? this.timeout : "null"}
+        force:${this.force ? this.force : "null"}`
     }
 }
 
@@ -123,6 +126,9 @@ export class DDZPlayer {
     // 倒计时handler
     private _timeoutHandler: number = null;
 
+    // 强制出牌标志
+    private _isForce: boolean = false;
+
     // 准备
     public readyEvent: DDZEvent = null;
     // 发牌
@@ -168,6 +174,7 @@ export class DDZPlayer {
         this._dcards = [];
         this._pcards = [];
         this._score = 0;
+        this._isForce = false;
     }
 
     /**
@@ -189,10 +196,13 @@ export class DDZPlayer {
                     self._round.executeChoiceScore(self, 0);
                 }
                 else if (state == DDZ_STATE.CHOICE_CARD) {
-                    // TODO 第一手必须出牌
-                    self._round.executeChoiceCard(self, []);
+                    if (self._isForce) {
+                        self._round.executeChoiceCard(self, [self.cards[0]]);
+                    }
+                    else {
+                        self._round.executeChoiceCard(self, []);
+                    }
                 }
-
                 this._clearTimeout();
             }
             else {
@@ -296,20 +306,29 @@ export class DDZPlayer {
     /**
      * 选择出牌
      * @param ocards 
+     * @param force 强制出牌
      */
-    public choiceCard(ocards: Array<number>): void {
+    public choiceCard(ocards: Array<number>, force: boolean): void {
+        this._isForce = force;
+
         this._setTimeout(15, DDZ_STATE.CHOICE_CARD);
 
         let data: DDZEventData = new DDZEventData();
         data.player = this;
         data.ocards = ocards;
+        data.force = force;
         this._callEvent(this.choiceCardEvent, data);
 
         // 托管随机抢
         if (this.agent) {
             let self = this;
             setTimeout(() => {
-                self._round.executeChoiceCard(self, []);
+                if (force) {
+                    self._round.executeChoiceCard(self, [self._cards[0]]);
+                }
+                else {
+                    self._round.executeChoiceCard(self, []);
+                }
             }, AGENT_TIME);
         }
     }
@@ -319,6 +338,9 @@ export class DDZPlayer {
      * @param dcards 要出去的牌
      */
     public executeChoiceCard(dcards: Array<number>): void {
+        this._isForce = false;
+        this._dcards = dcards;
+
         this._clearTimeout();
 
         // 移除出去的牌
@@ -366,7 +388,9 @@ export class DDZPlayer {
                 data = new DDZEventData();
             }
             data.player = this;
-            console.log(`${this.name} event: ${event.name} data:${data.tostring()}`);
+            if (event.name != "_onTimeoutEvent") {
+                console.log(`${this.name} event: ${event.name} data:${data.tostring()}`);
+            }
             event.handler.call(event.context, data);
         }
     }
@@ -610,10 +634,24 @@ export class DDZRound {
      * @param cards 需要镇压的牌
      */
     public choiceCard(player: DDZPlayer, cards: Array<number>): void {
-        if (!this._first) this._first = player;
+        // 本轮强制出牌标志
+        let force: boolean = false;
+        if (!this._first) {
+            force = true;
+        }
+        else {
+            // 上下两家都没出牌轮到自己应为强制出牌
+            let nextPlayer = this._nextPlayer(player);
+            let pretPlayer = this._pretPlayer(player);
+            force = nextPlayer.dcards.length == 0 && pretPlayer.dcards.length == 0;
+        }
+
+        if (force) {
+            this._first = player;
+        }
         this._current = player;
 
-        player.choiceCard(cards);
+        player.choiceCard(cards, force);
     }
 
     /**
@@ -708,6 +746,16 @@ export class DDZRound {
         if (this.isPlayerX(player)) return this.playerZ;
         if (this.isPlayerY(player)) return this.playerX;
         return this.playerY;
+    }
+
+    /**
+     * 上一个玩家
+     * @param player 相对玩家
+     */
+    private _pretPlayer(player: DDZPlayer): DDZPlayer {
+        if (this.isPlayerX(player)) return this.playerY;
+        if (this.isPlayerY(player)) return this.playerZ;
+        return this.playerX;
     }
 
     /**

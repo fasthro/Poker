@@ -166,7 +166,7 @@ export default class DDZCtroller extends BaseController {
     private _onChoiceCardEevnt(data: DDZEventData): void {
         if (this._round.isPlayerX(data.player)) this._view.setChoiceCardX();
         else if (this._round.isPlayerY(data.player)) this._view.setChoiceCardY();
-        else this._view.setChoiceCardZ(true, data.ocards);
+        else this._view.setChoiceCardZ(true, data.ocards, data.force);
     }
 
     /**

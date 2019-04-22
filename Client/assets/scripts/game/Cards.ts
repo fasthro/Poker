@@ -54,6 +54,9 @@ export default class Cards extends cc.Component {
     // touch
     private _touchEvent: cc.Touch;
 
+    // 是否为click
+    private _isClick: boolean = false;
+
     /**
      * 初始化牌
      * @param cards 牌数组
@@ -72,10 +75,10 @@ export default class Cards extends cc.Component {
         let count = cIds.length;
         for (let i = 0; i < count; i++) {
             if (i < ocount) {
-                this.resetCard(this._cards[i], cIds[i], i, count);
+                this._resetCard(this._cards[i], cIds[i], i, count);
             }
             else {
-                this._cards.push(this.createCard(cIds[i], i, count));
+                this._cards.push(this._createCard(cIds[i], i, count));
             }
         }
     }
@@ -92,7 +95,7 @@ export default class Cards extends cc.Component {
         if (index > this._cards.length)
             index = this._cards.length;
 
-        let card = this.createCard(id, index, this._cards.length + 1);
+        let card = this._createCard(id, index, this._cards.length + 1);
         card.node.setSiblingIndex(index);
         this._cards.splice(index, 0, card);
         this.updatePosition();
@@ -136,11 +139,11 @@ export default class Cards extends cc.Component {
      * @param index 
      * @param total 
      */
-    private createCard(cId: number, index: number, total: number): Card {
+    private _createCard(cId: number, index: number, total: number): Card {
         let cardNode: cc.Node = cc.instantiate(this.cardPrefab);
         this.node.addChild(cardNode);
         let card: Card = cardNode.getComponent("Card");
-        this.resetCard(card, cId, index, total);
+        this._resetCard(card, cId, index, total);
         return card;
     }
 
@@ -151,24 +154,31 @@ export default class Cards extends cc.Component {
      * @param index 
      * @param total 
      */
-    private resetCard(card: Card, cId: number, index: number, total: number): void {
+    private _resetCard(card: Card, cId: number, index: number, total: number): void {
         card.node.name = cId.toString();
-        card.node.setPosition(this.getCardPosition(index, total, false));
+        card.node.setPosition(this._getCardPosition(index, total, false));
         card.node.setSiblingIndex(index);
 
         if (this.touchEnabled) {
             // touch event
-            card.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
-            card.node.on(cc.Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
-            card.node.on(cc.Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
-            card.node.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
+            card.node.on(cc.Node.EventType.TOUCH_START, this._onTouchStart, this);
+            card.node.on(cc.Node.EventType.TOUCH_CANCEL, this._onTouchCancel, this);
+            card.node.on(cc.Node.EventType.TOUCH_MOVE, this._onTouchMove, this);
+            card.node.on(cc.Node.EventType.TOUCH_END, this._onTouchEnd, this);
+
+            // click
+            let clickHandler = new cc.Component.EventHandler();
+            clickHandler.component = "Cards";
+            clickHandler.target = this.node;
+            clickHandler.handler = "_onCardClick";
+            clickHandler.customEventData = index.toString();
 
             // init
-            card.initCard(cId, this.cardSize, this.atlas);
+            card.initCard(cId, this.cardSize, this.atlas, clickHandler);
         }
         else {
             // init
-            card.initCard(cId, this.cardSize, this.atlas);
+            card.initCard(cId, this.cardSize, this.atlas, null);
         }
     }
 
@@ -181,7 +191,7 @@ export default class Cards extends cc.Component {
         for (let i = 0; i < count; i++) {
             let card: Card = this._cards[i];
             let isDequeue = isReset ? false : card.isDequeue;
-            card.node.setPosition(this.getCardPosition(i, count, isDequeue));
+            card.node.setPosition(this._getCardPosition(i, count, isDequeue));
         }
     }
 
@@ -191,7 +201,7 @@ export default class Cards extends cc.Component {
      * @param total 总牌数
      * @param isDequeue 是否已经出列
      */
-    private getCardPosition(index: number, total: number, isDequeue: boolean): cc.Vec2 {
+    private _getCardPosition(index: number, total: number, isDequeue: boolean): cc.Vec2 {
         let totalWidth = this.cardSpace * total + this.cardSize.x - this.cardSpace;
         let x: number = 0;
         if (this.stretch == STRETCH.CENTER) {
@@ -211,7 +221,7 @@ export default class Cards extends cc.Component {
      * 是否为相同 touch
      * @param touch 
      */
-    private getSameTouch(touch: cc.Touch): boolean {
+    private _getSameTouch(touch: cc.Touch): boolean {
         if (this._touchEvent) {
             return this._touchEvent.getID() == touch.getID();
         }
@@ -219,12 +229,26 @@ export default class Cards extends cc.Component {
     }
 
     /**
+     * 单张牌点击事件回调
+     * @param event 
+     * @param customEventData 弹出的间距
+     */
+    private _onCardClick(event, customEventData): void {
+        this._isClick = true;
+        let index: number = parseInt(customEventData);
+        let card: Card = this._cards[index];
+        card.isDequeue = !card.isDequeue;
+        card.node.setPosition(this._getCardPosition(index, this._cards.length, card.isDequeue));
+        card.showMask(false);
+    }
+
+    /**
      * touch start
      * @param event 
      */
-    private onTouchStart(event): void {
+    private _onTouchStart(event): void {
         if (!this._touchEvent) {
-
+            this._isClick = false;
             this._touchEvent = event.touch;
 
             let count = this._cards.length - 1;
@@ -245,8 +269,8 @@ export default class Cards extends cc.Component {
      * touch move
      * @param event 
      */
-    private onTouchMove(event): void {
-        if (this.getSameTouch(event.touch)) {
+    private _onTouchMove(event): void {
+        if (this._getSameTouch(event.touch)) {
             let w = event.touch.getStartLocation().x - event.touch.getLocation().x;
             let h = this.cardSize.y + this.cardSpace + 2;
             let x = w > 0 ? event.touch.getLocation().x : event.touch.getStartLocation().x;
@@ -269,18 +293,27 @@ export default class Cards extends cc.Component {
      * touch cancel
      * @param event 
      */
-    private onTouchCancel(event): void {
-        this.onTouchEnd(event);
+    private _onTouchCancel(event): void {
+        this._onTouchEnd(event);
     }
 
     /**
      * touch end
      * @param event 
      */
-    private onTouchEnd(event): void {
-        if (this.getSameTouch(event.touch)) {
+    private _onTouchEnd(event): void {
+        if (this._isClick) {
+            for (let i = 0; i < this._cards.length; i++) {
+                let card: Card = this._cards[i];
+                card.isSelected = false;
+                card.showMask(false);
+            }
+            this._touchEvent = null;
+        }
+        else if (this._getSameTouch(event.touch)) {
             let unDequeue: boolean = true;
             let cards: { [key: number]: Card } = {};
+            let count: number = 0;
             for (let i = 0; i < this._cards.length; i++) {
                 let card: Card = this._cards[i];
                 if (card.isSelected) {
@@ -288,19 +321,20 @@ export default class Cards extends cc.Component {
                     if (!card.isDequeue && unDequeue) {
                         unDequeue = false;
                     }
+                    count++;
                 }
             }
-
-            for (let i = 0; i < this._cards.length; i++) {
-                let card = cards[i];
-                if (card) {
-                    card.showMask(false);
-                    card.isDequeue = !unDequeue;
-                    card.isSelected = false;
-                    card.node.setPosition(this.getCardPosition(i, this._cards.length, card.isDequeue));
+            if (count > 1) {
+                for (let i = 0; i < this._cards.length; i++) {
+                    let card = cards[i];
+                    if (card) {
+                        card.showMask(false);
+                        card.isDequeue = !unDequeue;
+                        card.isSelected = false;
+                        card.node.setPosition(this._getCardPosition(i, this._cards.length, card.isDequeue));
+                    }
                 }
             }
-
             this._touchEvent = null;
         }
     }

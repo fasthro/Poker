@@ -52,8 +52,14 @@ const DDZ_STATE = cc.Enum({
     CHOICE_CARD: 1,
 });
 
-// 托管执行时间
-export const AGENT_TIME: number = 2000;
+// 托管执行时间(秒)
+export const AGENT_TIME: number = 200;
+// 选择分数时间(秒)
+export const CHOICE_SCORE_TIME: number = 1500;
+// 第一次选牌时间(秒)
+export const FIRST_CHOICE_CARD_TIME: number = 1500;
+// 选牌时间(秒)
+export const CHOICE_CARD_TIME: number = 1500;
 
 /**
  * 斗地主 - 玩家数据
@@ -247,7 +253,7 @@ export class DDZPlayer {
      * @param minScore 可选择的最小分数
      */
     public choiceScore(minScore: number): void {
-        this._setTimeout(15, DDZ_STATE.CHOICE_SCORE);
+        this._setTimeout(CHOICE_SCORE_TIME, DDZ_STATE.CHOICE_SCORE);
 
         let data: DDZEventData = new DDZEventData();
         data.player = this;
@@ -264,7 +270,7 @@ export class DDZPlayer {
             let self = this;
             setTimeout(() => {
                 this._round.executeChoiceScore(self, alternative[DDZ.Utils.random(0, alternative.length - 1)]);
-            }, AGENT_TIME);
+            }, AGENT_TIME * 1000);
         }
     }
 
@@ -310,8 +316,8 @@ export class DDZPlayer {
      */
     public choiceCard(ocards: Array<number>, force: boolean): void {
         this._isForce = force;
-
-        this._setTimeout(15, DDZ_STATE.CHOICE_CARD);
+        
+        this._setTimeout(CHOICE_CARD_TIME, DDZ_STATE.CHOICE_CARD);
 
         let data: DDZEventData = new DDZEventData();
         data.player = this;
@@ -329,7 +335,7 @@ export class DDZPlayer {
                 else {
                     self._round.executeChoiceCard(self, []);
                 }
-            }, AGENT_TIME);
+            }, AGENT_TIME * 1000);
         }
     }
 

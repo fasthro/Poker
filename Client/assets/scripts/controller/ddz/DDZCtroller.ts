@@ -4,6 +4,7 @@ import { DDZRound, DDZEvent, DDZEventData } from "../../game/ddz/DDZRound";
 import { UILayer } from "../../define/UILayer";
 import Game from "../../Game";
 import { ControllerType } from "../../define/Controllers";
+import DDZ = require("../../game/ddz/DDZ");
 
 
 /*
@@ -117,6 +118,8 @@ export default class DDZCtroller extends BaseController {
      */
     private _onDealEvent(data: DDZEventData): void {
         this._view.setDeal(data.cards);
+
+        console.log(DDZ.AI._analysis(data.cards));
     }
 
     /**

@@ -1642,7 +1642,28 @@ module DDZ {
     }
 
     /**
-     * 出牌提示
+     * 牌型模式
+     */
+    export interface CardPattern {
+        absCard: number;
+        cards: Array<number>;
+        type: number;
+    }
+
+    // Card Pattern Type 
+    // 单牌
+    export const CPT_SINGLE = 0;
+    // 对子
+    export const CPT_PAIR = 1;
+    // 三条
+    export const CPT_TRIP = 2;
+    // 炸弹
+    export const CPT_BOMB = 3;
+    // 王炸
+    export const CPT_KING_BOMB = 4;
+
+    /**
+     * AI 出牌提示
      * - 牌的对应关系
      * - 3-10 = 3 - 10
      * - J    = 11
@@ -1653,21 +1674,21 @@ module DDZ {
      * - 小王 = 16
      * - 大王 = 17
      */
-    export class Assist {
+    export class AI {
         /**
          * 第一手出牌提示
          * @param cards 自己手中牌
          */
-        public static firstDiscard(cards: Array<number>): Array<Array<number>> {
+        public static firstPlan(cards: Array<number>): Array<Array<number>> {
             return null;
         }
 
         /**
-         * 多选只能提示
+         * 多选提示
          * @param ocards 
          * @param cards 
          */
-        public static specialDiscard(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
+        public static multipleChoicePlan(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
             return null;
         }
 
@@ -1677,7 +1698,7 @@ module DDZ {
          * @param ocards 对手出的牌
          * @param cards 自己手中牌
          */
-        public static discard(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
+        public static battlePlan(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
             return null;
         }
 
@@ -1686,7 +1707,7 @@ module DDZ {
          * @param ocards 对手出的牌
          * @param cards 自己手中牌
          */
-        public static competion(ocards: Array<number>, cards: Array<number>, dequeueCards: Array<number>): Array<number> {
+        public static competionPlan(ocards: Array<number>, cards: Array<number>, dequeueCards: Array<number>): Array<number> {
             return null;
         }
 
@@ -1712,8 +1733,60 @@ module DDZ {
          * 牌型分析(完全不考虑顺子)
          * @param cards 
          */
-        private static _analysis(cards: Array<number>): void {
+        public static _analysis(cards: Array<number>): Array<CardPattern> {
+            let patterns: Array<CardPattern> = [];
+            for (let i = 0; i < cards.length; i++) {
+                let card = cards[i];
+                let absCard = this._absoluteCard(card);
+                let insert = false;
+                for (let k = 0; k < patterns.length; k++) {
+                    let pattern = <CardPattern>patterns[k];
+                    if (pattern.absCard == absCard) {
+                        pattern.cards.push(card);
+                        if (pattern.type == CPT_SINGLE) {
+                            pattern.type = CPT_PAIR;
+                        } else if (pattern.type == CPT_PAIR) {
+                            pattern.type = CPT_TRIP;
+                        } else if (pattern.type == CPT_TRIP) {
+                            pattern.type = CPT_BOMB;
+                        }
+                        insert = true;
+                        break;
+                    }
+                }
+                if (!insert) {
+                    let pattern: CardPattern = { absCard: absCard, cards: [card], type: CPT_SINGLE };
+                    patterns.push(pattern);
+                }
+            }
+            // 大小王重新分析
+            let kings: Array<number> = [];
+            for (let i = 0; i < patterns.length; i++) {
+                let pattern = patterns[i];
+                if (pattern.absCard == 16) {
+                    kings.push(i);
+                }
+                else if (pattern.absCard == 17) {
+                    kings.push(i);
+                }
+                if (kings.length == 2) break;
+            }
+            if (kings.length == 2) {
+                patterns[kings[0]].type = CPT_KING_BOMB;
+                patterns[kings[0]].cards.push(patterns[kings[1]].cards[0]);
+                patterns.splice(kings[1], 1);
+            }
+            return patterns
+        }
 
+        /**
+         * 牌型分析(按一个AI规则取一个最佳的)
+         * @param cards 
+         */
+        public static _analysisAI(cards: Array<number>): Array<CardPattern> {
+            let patterns: Array<CardPattern> = [];
+
+            return patterns;
         }
     }
 

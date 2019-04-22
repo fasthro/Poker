@@ -40,10 +40,12 @@ export default class Card extends cc.Component {
      * @param atlas 图集
      * @param clickHandler 点击事件
      */
-    public initCard(cId: number, cardSize: cc.Vec2, atlas: cc.SpriteAtlas): void {
+    public initCard(cId: number, cardSize: cc.Vec2, atlas: cc.SpriteAtlas, clickHandler: cc.Component.EventHandler): void {
         this._cId = cId;
         this.isDequeue = false;
         this.isSelected = false;
+        this._btn.clickEvents = [];
+        if (clickHandler) this._btn.clickEvents.push(clickHandler);
         this.node.setContentSize(cardSize.x, cardSize.y);
         this._iconSprite.spriteFrame = atlas.getSpriteFrame(cId.toString());
         this._iconSprite.node.setContentSize(cardSize.x, cardSize.y);

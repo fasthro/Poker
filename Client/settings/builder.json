@@ -20,7 +20,7 @@
   "includeSDKBox": false,
   "inlineSpriteFrames": true,
   "inlineSpriteFrames_native": true,
-  "md5Cache": false,
+  "md5Cache": true,
   "mergeStartScene": false,
   "optimizeHotUpdate": false,
   "orientation": {
@@ -39,7 +39,7 @@
   "title": "JK",
   "webOrientation": "auto",
   "wechatgame": {
-    "REMOTE_SERVER_ROOT": "",
+    "REMOTE_SERVER_ROOT": "https://fasthro.com/static/resource/0.1.0/",
     "appid": "wx829a8ec7a50b1ea9",
     "orientation": "landscape",
     "subContext": ""

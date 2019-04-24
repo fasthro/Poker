@@ -117,9 +117,18 @@ export default class DDZCtroller extends BaseController {
      * @param data 
      */
     private _onDealEvent(data: DDZEventData): void {
-        this._view.setDeal(data.cards);
+        // 12,13,14,16,17,18,20,21,22 三顺
+        // 8,9,10,11 炸弹
+        // 2,3 王炸
+        let cards = [12, 13, 16, 17, 20, 21, 41, 39]
+        this._view.setDeal(cards);
 
-        console.log(DDZ.AI._analysis(data.cards));
+        // let ps = DDZ.AI._analysis(data.cards);
+        // for (let i = 0; i < ps.length; i++) {
+        //     console.log(ps[i].tostring());
+        // }
+
+        DDZ.AI.test(cards);
     }
 
     /**
@@ -182,10 +191,10 @@ export default class DDZCtroller extends BaseController {
         else this._view.setExecuteChoiceCardZ(data.dcards, data.cards);
     }
 
-     /**
-     * 倒计时
-     * @param data 
-     */
+    /**
+    * 倒计时
+    * @param data 
+    */
     private _onTimeoutEvent(data: DDZEventData): void {
         if (this._round.isPlayerX(data.player)) this._view.setTimeoutX(data.timeout);
         else if (this._round.isPlayerY(data.player)) this._view.setTimeoutY(data.timeout);

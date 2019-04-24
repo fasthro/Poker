@@ -41,6 +41,22 @@ module DDZ {
      * - 牌的对应关系
      * - 大王 小王 黑桃A 红桃A 草花A 方片A  黑桃2 红桃2 草花2 方片2 黑桃3 红桃3 草花3 方片3 ...
      * -  2    3     4    5    6     7     8     9    10    11    12   13    14    15  ...
+     * 
+     *  大 - 2
+     *  小 - 3
+     *  3  - 12,13,14,15
+     *  4  - 16,17,18,19
+     *  5  - 20,21,22,23
+     *  6  - 24,25,26,27
+     *  7  - 28,29,30,31
+     *  8  - 32,33,34,35
+     *  9  - 36,37,38,39
+     *  10 - 40,41,42,43
+     *  J  - 44,45,46,47
+     *  Q  - 48,49,50,51
+     *  K  - 52,53,54,55
+     *  A  - 4,5,6,7
+     *  2  - 8,9,10,11
      */
     export class Core {
 
@@ -1642,75 +1658,78 @@ module DDZ {
     }
 
     /**
-     * 牌型模式
+     * 牌型类型
      */
-    export interface CardPattern {
-        absCard: number;
-        cards: Array<number>;
-        type: number;
-    }
-
-    // Card Pattern Type 
-    // 单牌
-    export const CPT_SINGLE = 0;
-    // 对子
-    export const CPT_PAIR = 1;
-    // 三条
-    export const CPT_TRIP = 2;
-    // 炸弹
-    export const CPT_BOMB = 3;
-    // 王炸
-    export const CPT_KING_BOMB = 4;
+    const PatternType = cc.Enum({
+        SINGLE: 0,
+        PAIR: 1,
+        TRIP: 2,
+        BOMB: 3,
+        KING_BOMB: 4,
+        STRAIGHT3: 5,
+        STRAIGHT2: 6,
+        STRAIGHT: 7,
+    });
 
     /**
-     * AI 出牌提示
-     * - 牌的对应关系
-     * - 3-10 = 3 - 10
-     * - J    = 11
-     * - Q    = 12
-     * - K    = 13
-     * - A    = 14
-     * - 2    = 15
-     * - 小王 = 16
-     * - 大王 = 17
+     * 牌型
+     */
+    export class Pattern {
+        // 牌绝对值
+        public absCard: number;
+        // 所有牌
+        public cards: Array<number>;
+        // 牌型类型
+        public type: number;
+
+        public tostring(): string {
+            // 牌型
+            let cpt = "";
+            if (this.type == PatternType.SINGLE) cpt = "单牌"
+            else if (this.type == PatternType.PAIR) cpt = "对子"
+            else if (this.type == PatternType.TRIP) cpt = "三条"
+            else if (this.type == PatternType.BOMB) cpt = "炸弹"
+            else if (this.type == PatternType.KING_BOMB) cpt = "王炸"
+            else if (this.type == PatternType.STRAIGHT3) cpt = "三顺"
+            else if (this.type == PatternType.STRAIGHT2) cpt = "双顺"
+            else if (this.type == PatternType.STRAIGHT) cpt = "单顺"
+
+            // 牌
+            let cs = "";
+            for (let i = 0; i < this.cards.length; i++) {
+                let card = this.cards[i];
+                let str = "";
+                if (card == 2) str = "大王"
+                else if (card == 3) str = "小王"
+                else if (card >= 4 && card <= 7) str = "A"
+                else if (card >= 8 && card <= 11) str = "2"
+                else {
+                    let num = Math.floor(card / 4);
+                    if (num == 11) str = "J"
+                    else if (num == 12) str = "Q"
+                    else if (num == 13) str = "K"
+                    else str = num.toString();
+                }
+
+                cs += str;
+                if (i < this.cards.length - 1) cs += ",";
+            }
+            return `牌型: ${cpt} - abs:${this.absCard} - 牌: ${cs}`;
+        }
+    }
+
+    /**
+     * 计数接口
+     */
+    export interface ICount {
+        absCard: number;
+        count: number;
+    }
+
+    /**
+     * AI
      */
     export class AI {
-        /**
-         * 第一手出牌提示
-         * @param cards 自己手中牌
-         */
-        public static firstPlan(cards: Array<number>): Array<Array<number>> {
-            return null;
-        }
-
-        /**
-         * 多选提示
-         * @param ocards 
-         * @param cards 
-         */
-        public static multipleChoicePlan(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
-            return null;
-        }
-
-
-        /**
-         * 压牌提示
-         * @param ocards 对手出的牌
-         * @param cards 自己手中牌
-         */
-        public static battlePlan(ocards: Array<number>, cards: Array<number>): Array<Array<number>> {
-            return null;
-        }
-
-        /**
-         * 补全提示
-         * @param ocards 对手出的牌
-         * @param cards 自己手中牌
-         */
-        public static competionPlan(ocards: Array<number>, cards: Array<number>, dequeueCards: Array<number>): Array<number> {
-            return null;
-        }
-
         /**
         * 将外部数据的牌编号,变成内部方便比较大小的绝对值
         * @param cards 
@@ -1730,32 +1749,78 @@ module DDZ {
         }
 
         /**
-         * 牌型分析(完全不考虑顺子)
+         * copy
          * @param cards 
          */
-        public static _analysis(cards: Array<number>): Array<CardPattern> {
-            let patterns: Array<CardPattern> = [];
+        private static _copyCards(cards: Array<number>): Array<number> {
+            let ncards: Array<number> = [];
+            for (let i = 0; i < cards.length; i++) {
+                ncards[i] = cards[i];
+            }
+            return ncards;
+        }
+
+        /**
+         * 判断对象是否存在
+         * @param obj 
+         */
+        private static _existObj(obj: any): boolean {
+            return obj != null && obj != undefined;
+        }
+
+        /**
+         * 排序 Pattern
+         * @param pattern1 
+         * @param pattern2 
+         */
+        private static _comparePattern(pattern1: Pattern, pattern2: Pattern): number {
+            if (pattern1.absCard > pattern2.absCard) return 1;
+            else if (pattern1.absCard < pattern2.absCard) return -1;
+            else return 0;
+        }
+
+        /**
+         * 排序 ICount
+         * @param pattern1 
+         * @param pattern2 
+         */
+        private static _compareICount(c1: ICount, c2: ICount): number {
+            if (c1.absCard > c2.absCard) return 1;
+            else if (c1.absCard < c2.absCard) return -1;
+            else return 0;
+        }
+
+        /**
+         * 获取牌型(完全不考虑顺子)
+         * @param cards 
+         */
+        private static _getPatterns(cards: Array<number>): Array<Pattern> {
+            let patterns: Array<Pattern> = [];
             for (let i = 0; i < cards.length; i++) {
                 let card = cards[i];
                 let absCard = this._absoluteCard(card);
                 let insert = false;
                 for (let k = 0; k < patterns.length; k++) {
-                    let pattern = <CardPattern>patterns[k];
+                    let pattern = <Pattern>patterns[k];
                     if (pattern.absCard == absCard) {
                         pattern.cards.push(card);
-                        if (pattern.type == CPT_SINGLE) {
-                            pattern.type = CPT_PAIR;
-                        } else if (pattern.type == CPT_PAIR) {
-                            pattern.type = CPT_TRIP;
-                        } else if (pattern.type == CPT_TRIP) {
-                            pattern.type = CPT_BOMB;
+                        if (pattern.type == PatternType.SINGLE) {
+                            pattern.type = PatternType.PAIR;
+                        } else if (pattern.type == PatternType.PAIR) {
+                            pattern.type = PatternType.TRIP;
+                        } else if (pattern.type == PatternType.TRIP) {
+                            pattern.type = PatternType.BOMB;
                         }
                         insert = true;
                         break;
                     }
                 }
                 if (!insert) {
-                    let pattern: CardPattern = { absCard: absCard, cards: [card], type: CPT_SINGLE };
+                    let pattern = new Pattern();
+                    pattern.absCard = absCard;
+                    pattern.cards = [card];
+                    pattern.type = PatternType.SINGLE;
+
                     patterns.push(pattern);
                 }
             }
@@ -1772,7 +1837,7 @@ module DDZ {
                 if (kings.length == 2) break;
             }
             if (kings.length == 2) {
-                patterns[kings[0]].type = CPT_KING_BOMB;
+                patterns[kings[0]].type = PatternType.KING_BOMB;
                 patterns[kings[0]].cards.push(patterns[kings[1]].cards[0]);
                 patterns.splice(kings[1], 1);
             }
@@ -1780,13 +1845,407 @@ module DDZ {
         }
 
         /**
-         * 牌型分析(按一个AI规则取一个最佳的)
+         * 获取牌型(按一个AI规则取一个最佳的)
          * @param cards 
          */
-        public static _analysisAI(cards: Array<number>): Array<CardPattern> {
-            let patterns: Array<CardPattern> = [];
+        private static _getAIPatterns(cards: Array<number>): Array<Pattern> {
+            // 牌型
+            // 王炸
+            let kingbombs: Array<Pattern> = [];
+            // 炸弹
+            let bombs: Array<Pattern> = [];
+            // 三条
+            let trips: Array<Pattern> = [];
+            // 三顺
+            let straights3: Array<Pattern> = [];
+            // 双顺
+            let straights2: Array<Pattern> = [];
+            // 单顺
+            let straights: Array<Pattern> = [];
+            // 对子
+            let pairs: Array<Pattern> = [];
+            // 单牌
+            let singles: Array<Pattern> = [];
 
-            return patterns;
+            // 移除列表
+            let removes: Array<number> = [];
+
+            // 牌列表
+            let ncards = this._copyCards(cards);
+
+            // 每张牌数量字典
+            let map: { [index: number]: number } = {};
+            for (let i = 0; i < ncards.length; i++) {
+                let absCard = this._absoluteCard(ncards[i]);
+                map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
+            }
+
+            // 双王
+            if (this._existObj(map[17]) && this._existObj(map[16])) {
+                map[16] = null;
+                map[17] = null;
+
+                let count = ncards.length;
+                for (let i = 0; i < count; i++) {
+                    if (ncards[i] == 2 || ncards[i] == 3) {
+                        let index = i - (count - ncards.length)
+                        ncards.splice(index, 1);
+                    }
+                }
+
+                let pattern = new Pattern();
+                pattern.absCard = 17;
+                pattern.cards = [2, 3];
+                pattern.type = PatternType.KING_BOMB;
+
+                kingbombs.push(pattern);
+            }
+
+            // 炸弹，三条
+            for (let item in map) {
+                let absCard = parseInt(item);
+                if (this._existObj(map[absCard])) {
+                    // 炸弹
+                    if (map[absCard] == 4) {
+                        let pattern = new Pattern();
+                        pattern.absCard = absCard;
+                        pattern.cards = [];
+                        pattern.type = PatternType.BOMB;
+
+                        for (let k = 0; k < 4; k++) {
+                            for (let i = 0; i < ncards.length; i++) {
+                                if (this._absoluteCard(ncards[i]) == absCard) {
+                                    pattern.cards.push(ncards[i]);
+                                    ncards.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                        bombs.push(pattern);
+                        map[absCard] = null;
+                    }
+                    // 三条
+                    else if (map[absCard] == 3) {
+                        let pattern = new Pattern();
+                        pattern.absCard = absCard;
+                        pattern.cards = [];
+                        pattern.type = PatternType.TRIP;
+
+                        for (let k = 0; k < 3; k++) {
+                            for (let i = 0; i < ncards.length; i++) {
+                                if (this._absoluteCard(ncards[i]) == absCard) {
+                                    pattern.cards.push(ncards[i]);
+                                    ncards.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                        trips.push(pattern);
+                        map[absCard] = null;
+                    }
+                }
+            }
+
+            // 三顺
+            removes = [];
+            if (trips.length >= 2) {
+                trips.sort(this._comparePattern);
+                let merger: boolean = false;
+                let pattern: Pattern = null;
+                for (let i = 0; i < trips.length - 1; i++) {
+                    if (trips[i + 1].absCard != 15 && trips[i].absCard + 1 == trips[i + 1].absCard) {
+                        if (merger) {
+                            for (let _c of trips[i + 1].cards) {
+                                pattern.cards.push(_c);
+                            }
+
+                            removes.push(i + 1);
+                        } else {
+                            pattern = new Pattern();
+                            pattern.absCard = trips[i].absCard;
+                            pattern.cards = [];
+                            pattern.type = PatternType.STRAIGHT3;
+                            for (let _c of trips[i].cards) {
+                                pattern.cards.push(_c);
+                            }
+                            for (let _c of trips[i + 1].cards) {
+                                pattern.cards.push(_c);
+                            }
+
+                            straights3.push(pattern);
+
+                            removes.push(i);
+                            removes.push(i + 1);
+                        }
+                    }
+                    else {
+                        merger = false;
+                    }
+                }
+
+                for (let i = removes.length - 1; i >= 0; i--) {
+                    trips.splice(removes[i], 1);
+                }
+            }
+
+            // 单顺子
+            // 取剩余的牌，按照从小到大的顺序排列
+            let remains: Array<ICount> = [];
+            for (let item in map) {
+                let absCard = parseInt(item);
+                if (this._existObj(map[absCard])) {
+                    let c: ICount = { absCard: absCard, count: map[item] };
+                    remains.push(c);
+                }
+            }
+            remains.sort(this._compareICount);
+            // 查询单顺
+            if (remains.length >= 5) {
+                // 第一步,先取出最小的一个五连 再在剩余的牌中取出最小的一个五连，依此类推，直到没有五连为止
+                let len = remains.length;
+                while (len > 0) {
+                    len--;
+                    let c = 0;
+                    for (let i = 1; i < remains.length; i++) {
+                        if (remains[i - 1].count > 0 && remains[i].count > 0
+                            && remains[i].absCard < 15
+                            && remains[i - 1].absCard + 1 == remains[i].absCard) {
+                            if (c == 0) c = 2;
+                            else if (c == 4) {
+                                let pattern = new Pattern();
+                                pattern.absCard = remains[i - 4].absCard;
+                                pattern.cards = [];
+                                pattern.type = PatternType.STRAIGHT;
+                                for (let k = 4; k >= 0; k--) {
+                                    let re = remains[i - 4 + k]
+                                    for (let m = 0; m < ncards.length; m++) {
+                                        if (this._absoluteCard(ncards[m]) == re.absCard) {
+                                            pattern.cards.push(ncards[m]);
+                                            re.count -= 1;
+                                            ncards.splice(m, 1);
+                                            break;
+                                        }
+                                    }
+                                }
+                                pattern.cards.sort();
+                                straights.push(pattern);
+                                break;
+                            }
+                            else c += 1;
+                        }
+                        else c = 0
+                    }
+
+                    for (let i = 0; i < remains.length; i++) {
+                        if (remains[i].count <= 0) remains.splice(i, 1);
+                    }
+                }
+
+                // 第二步,扩展五连
+                removes = [];
+                ncards.sort();
+                len = ncards.length;
+                while (len > 0) {
+                    len--;
+                    let end: boolean = false;
+                    for (let i = 0; i < ncards.length; i++) {
+                        let absCard = this._absoluteCard(ncards[i]);
+                        if (absCard >= 15) continue;
+                        for (let k = 0; k < straights.length; k++) {
+                            let pattern = straights[k];
+                            if (pattern.type != PatternType.STRAIGHT) continue;
+                            // 最小一张成顺子
+                            if (absCard + 1 == pattern.absCard) {
+                                pattern.cards.push(ncards[i]);
+                                pattern.absCard = absCard;
+                                ncards.splice(i, 1);
+                                end = true;
+                                break;
+                            }
+                            // 最大一张成顺子
+                            else if (pattern.absCard + pattern.cards.length == absCard) {
+                                pattern.cards.push(ncards[i]);
+                                ncards.splice(i, 1);
+                                end = true;
+                                break;
+                            }
+                        }
+                        if (end) break;
+                    }
+                }
+
+                // 第三步,无缝连接成更大的连牌(如果可能的话)
+                if (straights.length > 1) {
+                    let len = straights.length;
+                    while (len > 0) {
+                        len--;
+                        for (let i = 0; i < straights.length; i++) {
+                            let end: boolean = false;
+                            for (let k = i + 1; k < straights.length; k++) {
+                                if (straights[i].absCard + straights[i].cards.length == straights[k].absCard) {
+                                    for (let m = 0; m < straights[k].cards.length; m++) {
+                                        straights[i].cards.push(straights[k].cards[m]);
+                                    }
+                                    straights.splice(k, 1);
+                                    end = true;
+                                    break;
+                                }
+                            }
+                            if (end) break;
+                        }
+                    }
+                }
+            }
+
+            // 双顺(单顺合双顺)
+            if (straights.length > 1) {
+                let len = straights.length;
+                while (len > 0) {
+                    len--;
+                    for (let i = 0; i < straights.length; i++) {
+                        let end: boolean = false;
+                        for (let k = i + 1; k < straights.length; k++) {
+                            if (straights[i].absCard == straights[k].absCard && straights[i].cards.length == straights[k].cards.length) {
+                                let pattern = new Pattern();
+                                pattern.absCard = straights[i].absCard;
+                                pattern.cards = [];
+                                pattern.type = PatternType.STRAIGHT2;
+                                for (let m = 0; m < straights[i].cards.length; m++) {
+                                    pattern.cards.push(straights[i].cards[m]);
+                                }
+                                for (let m = 0; m < straights[k].cards.length; m++) {
+                                    pattern.cards.push(straights[k].cards[m]);
+                                }
+                                pattern.cards.sort();
+                                straights2.push(pattern);
+
+                                straights.splice(k, 1);
+                                straights.splice(i, 1);
+                                end = true;
+                                break;
+                            }
+                        }
+                        if (end) break;
+                    }
+                }
+            }
+
+            // 对子
+            map = {};
+            for (let i = 0; i < ncards.length; i++) {
+                let absCard = this._absoluteCard(ncards[i]);
+                map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
+            }
+            for (let item in map) {
+                if (map[item] == 2) {
+                    let pattern = new Pattern();
+                    pattern.absCard = parseInt(item);
+                    pattern.cards = [];
+                    pattern.type = PatternType.PAIR;
+
+                    for (let k = 0; k < 2; k++) {
+                        for (let m = 0; m < ncards.length; m++) {
+                            if (this._absoluteCard(ncards[m]) == pattern.absCard) {
+                                pattern.cards.push(ncards[m]);
+                                ncards.splice(m, 1);
+                                break;
+                            }
+                        }
+                    }
+                    pairs.push(pattern);
+                }
+            }
+
+            // 双顺(对子合双顺)
+            if (pairs.length > 2) {
+                removes = [];
+
+                let c = 0;
+                let pattern: Pattern = null;
+                for (let i = 0; i < pairs.length - 1; i++) {
+                    if (pairs[i + 1].absCard != 15 && pairs[i].absCard + 1 == pairs[i + 1].absCard) {
+                        if (c == 0) c = 2;
+                        else if (c == 2) {
+                            c = 3;
+
+                            pattern = new Pattern();
+                            pattern.absCard = pairs[i - 1].absCard;
+                            pattern.cards = [];
+                            pattern.type = PatternType.STRAIGHT2;
+
+                            for (let m = 0; m < pairs[i - 1].cards.length; m++) {
+                                pattern.cards.push(pairs[i - 1].cards[m]);
+                            }
+                            for (let m = 0; m < pairs[i].cards.length; m++) {
+                                pattern.cards.push(pairs[i].cards[m]);
+                            }
+                            for (let m = 0; m < pairs[i + 1].cards.length; m++) {
+                                pattern.cards.push(pairs[i + 1].cards[m]);
+                            }
+
+                            straights2.push(pattern);
+
+                            removes.push(i - 1);
+                            removes.push(i);
+                            removes.push(i + 1);
+                        }
+                        else {
+                            c += 1;
+                            for (let m = 0; m < pairs[i + 1].cards.length; m++) {
+                                pattern.cards.push(pairs[i + 1].cards[m]);
+                            }
+                            removes.push(i + 1);
+                        }
+                    }
+                    else c = 0;
+                }
+
+                for (let i = removes.length - 1; i >= 0; i--) {
+                    pairs.splice(removes[i], 1);
+                }
+            }
+
+            // 单牌
+            for (let i = 0; i < ncards.length; i++) {
+                let pattern = new Pattern();
+                pattern.absCard = this._absoluteCard(ncards[i]);
+                pattern.cards = [ncards[i]];
+                pattern.type = PatternType.SINGLE;
+
+                singles.push(pattern);
+            }
+
+
+            // log
+            for (let i = 0; i < kingbombs.length; i++) {
+                console.log(kingbombs[i].tostring());
+            }
+            for (let i = 0; i < bombs.length; i++) {
+                console.log(bombs[i].tostring());
+            }
+            for (let i = 0; i < trips.length; i++) {
+                console.log(trips[i].tostring());
+            }
+            for (let i = 0; i < straights3.length; i++) {
+                console.log(straights3[i].tostring());
+            }
+            for (let i = 0; i < straights2.length; i++) {
+                console.log(straights2[i].tostring());
+            }
+            for (let i = 0; i < straights.length; i++) {
+                console.log(straights[i].tostring());
+            }
+            for (let i = 0; i < pairs.length; i++) {
+                console.log(pairs[i].tostring());
+            }
+            for (let i = 0; i < singles.length; i++) {
+                console.log(singles[i].tostring());
+            }
+            return null;
+        }
+
+        public static test(cards: Array<number>) {
+            this._getAIPatterns(cards);
         }
     }
 

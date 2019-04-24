@@ -53,13 +53,13 @@ const DDZ_STATE = cc.Enum({
 });
 
 // 托管执行时间(秒)
-export const AGENT_TIME: number = 200;
+const AGENT_TIME: number = 200;
 // 选择分数时间(秒)
-export const CHOICE_SCORE_TIME: number = 1500;
+const CHOICE_SCORE_TIME: number = 1500;
 // 第一次选牌时间(秒)
-export const FIRST_CHOICE_CARD_TIME: number = 1500;
+const FIRST_CHOICE_CARD_TIME: number = 1500;
 // 选牌时间(秒)
-export const CHOICE_CARD_TIME: number = 1500;
+const CHOICE_CARD_TIME: number = 1500;
 
 /**
  * 斗地主 - 玩家数据
@@ -316,7 +316,7 @@ export class DDZPlayer {
      */
     public choiceCard(ocards: Array<number>, force: boolean): void {
         this._isForce = force;
-        
+
         this._setTimeout(CHOICE_CARD_TIME, DDZ_STATE.CHOICE_CARD);
 
         let data: DDZEventData = new DDZEventData();

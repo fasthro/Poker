@@ -121,14 +121,14 @@ export default class DDZCtroller extends BaseController {
         // 8,9,10,11 炸弹
         // 2,3 王炸
         let cards = [12, 13, 16, 17, 20, 21, 41, 39]
-        this._view.setDeal(cards);
+        this._view.setDeal(data.cards);
 
         // let ps = DDZ.AI._analysis(data.cards);
         // for (let i = 0; i < ps.length; i++) {
         //     console.log(ps[i].tostring());
         // }
 
-        DDZ.AI.test(cards);
+        DDZ.AI.test(data.cards);
     }
 
     /**

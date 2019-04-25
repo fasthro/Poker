@@ -1722,8 +1722,32 @@ module DDZ {
      * 计数接口
      */
     export interface ICount {
+        // 牌绝对值
         absCard: number;
+        // 牌数量
         count: number;
+    }
+
+    /**
+     * 全部牌型接口
+     */
+    export interface IPatterns {
+        // 王炸
+        kingbombs?: Array<Pattern>;
+        // 炸弹
+        bombs?: Array<Pattern>;
+        // 三条
+        trips?: Array<Pattern>;
+        // 三顺
+        straights3?: Array<Pattern>;
+        // 双顺
+        straights2?: Array<Pattern>;
+        // 单顺
+        straights?: Array<Pattern>;
+        // 对子
+        pairs?: Array<Pattern>;
+        // 单牌
+        singles?: Array<Pattern>;
     }
 
     /**
@@ -1749,7 +1773,7 @@ module DDZ {
         }
 
         /**
-         * copy
+         * copy cards
          * @param cards 
          */
         private static _copyCards(cards: Array<number>): Array<number> {
@@ -1758,6 +1782,39 @@ module DDZ {
                 ncards[i] = cards[i];
             }
             return ncards;
+        }
+
+        /**
+         * copy pattern
+         * @param patterns 
+         */
+        private static _copyPatterns(patterns: Array<Pattern>): Array<Pattern> {
+            let npatterns: Array<Pattern> = [];
+            for (let i = 0; i < patterns.length; i++) {
+                let pattern = new Pattern();
+                pattern.absCard = patterns[i].absCard;
+                pattern.type = patterns[i].type;
+                pattern.cards = this._copyCards(patterns[i].cards);
+                npatterns.push(pattern);
+            }
+            return npatterns;
+        }
+
+        /**
+         * copy IPattern
+         * @param patterns 
+         */
+        private static _copyIPatterns(patterns: IPatterns): IPatterns {
+            let npatterns: IPatterns = {};
+            npatterns.kingbombs = this._copyPatterns(patterns.kingbombs);
+            npatterns.bombs = this._copyPatterns(patterns.bombs);
+            npatterns.trips = this._copyPatterns(patterns.trips);
+            npatterns.straights3 = this._copyPatterns(patterns.straights3);
+            npatterns.straights2 = this._copyPatterns(patterns.straights2);
+            npatterns.straights = this._copyPatterns(patterns.straights);
+            npatterns.pairs = this._copyPatterns(patterns.pairs);
+            npatterns.singles = this._copyPatterns(patterns.singles);
+            return npatterns;
         }
 
         /**
@@ -1849,28 +1906,11 @@ module DDZ {
          * @param cards 
          */
         private static _getAIPatterns(cards: Array<number>): Array<Pattern> {
-            // 牌型
-            // 王炸
-            let kingbombs: Array<Pattern> = [];
-            // 炸弹
-            let bombs: Array<Pattern> = [];
-            // 三条
-            let trips: Array<Pattern> = [];
-            // 三顺
-            let straights3: Array<Pattern> = [];
-            // 双顺
-            let straights2: Array<Pattern> = [];
-            // 单顺
-            let straights: Array<Pattern> = [];
-            // 对子
-            let pairs: Array<Pattern> = [];
-            // 单牌
-            let singles: Array<Pattern> = [];
+            console.time("_getAIPatterns");
+            // 所有牌型
+            let all: Array<IPatterns> = [];
 
-            // 移除列表
             let removes: Array<number> = [];
-
-            // 牌列表
             let ncards = this._copyCards(cards);
 
             // 每张牌数量字典
@@ -1879,6 +1919,9 @@ module DDZ {
                 let absCard = this._absoluteCard(ncards[i]);
                 map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
             }
+
+            ///////////////////// 不拆三条，不拆炸弹的牌型 //////////////////////
+            let pat: IPatterns = { kingbombs: [], bombs: [], trips: [], straights3: [], straights2: [], straights: [], pairs: [], singles: [] };
 
             // 双王
             if (this._existObj(map[17]) && this._existObj(map[16])) {
@@ -1921,7 +1964,7 @@ module DDZ {
                                 }
                             }
                         }
-                        bombs.push(pattern);
+                        pat.bombs.push(pattern);
                         map[absCard] = null;
                     }
                     // 三条
@@ -1940,7 +1983,7 @@ module DDZ {
                                 }
                             }
                         }
-                        trips.push(pattern);
+                        pat.trips.push(pattern);
                         map[absCard] = null;
                     }
                 }
@@ -1948,31 +1991,31 @@ module DDZ {
 
             // 三顺
             removes = [];
-            if (trips.length >= 2) {
-                trips.sort(this._comparePattern);
+            if (pat.trips.length >= 2) {
+                pat.trips.sort(this._comparePattern);
                 let merger: boolean = false;
                 let pattern: Pattern = null;
-                for (let i = 0; i < trips.length - 1; i++) {
-                    if (trips[i + 1].absCard != 15 && trips[i].absCard + 1 == trips[i + 1].absCard) {
+                for (let i = 0; i < pat.trips.length - 1; i++) {
+                    if (pat.trips[i + 1].absCard != 15 && pat.trips[i].absCard + 1 == pat.trips[i + 1].absCard) {
                         if (merger) {
-                            for (let _c of trips[i + 1].cards) {
+                            for (let _c of pat.trips[i + 1].cards) {
                                 pattern.cards.push(_c);
                             }
 
                             removes.push(i + 1);
                         } else {
                             pattern = new Pattern();
-                            pattern.absCard = trips[i].absCard;
+                            pattern.absCard = pat.trips[i].absCard;
                             pattern.cards = [];
                             pattern.type = PatternType.STRAIGHT3;
-                            for (let _c of trips[i].cards) {
+                            for (let _c of pat.trips[i].cards) {
                                 pattern.cards.push(_c);
                             }
-                            for (let _c of trips[i + 1].cards) {
+                            for (let _c of pat.trips[i + 1].cards) {
                                 pattern.cards.push(_c);
                             }
 
-                            straights3.push(pattern);
+                            pat.straights3.push(pattern);
 
                             removes.push(i);
                             removes.push(i + 1);
@@ -1984,7 +2027,7 @@ module DDZ {
                 }
 
                 for (let i = removes.length - 1; i >= 0; i--) {
-                    trips.splice(removes[i], 1);
+                    pat.trips.splice(removes[i], 1);
                 }
             }
 
@@ -2028,7 +2071,7 @@ module DDZ {
                                     }
                                 }
                                 pattern.cards.sort();
-                                straights.push(pattern);
+                                pat.straights.push(pattern);
                                 break;
                             }
                             else c += 1;
@@ -2051,8 +2094,8 @@ module DDZ {
                     for (let i = 0; i < ncards.length; i++) {
                         let absCard = this._absoluteCard(ncards[i]);
                         if (absCard >= 15) continue;
-                        for (let k = 0; k < straights.length; k++) {
-                            let pattern = straights[k];
+                        for (let k = 0; k < pat.straights.length; k++) {
+                            let pattern = pat.straights[k];
                             if (pattern.type != PatternType.STRAIGHT) continue;
                             // 最小一张成顺子
                             if (absCard + 1 == pattern.absCard) {
@@ -2075,18 +2118,18 @@ module DDZ {
                 }
 
                 // 第三步,无缝连接成更大的连牌(如果可能的话)
-                if (straights.length > 1) {
-                    let len = straights.length;
+                if (pat.straights.length > 1) {
+                    let len = pat.straights.length;
                     while (len > 0) {
                         len--;
-                        for (let i = 0; i < straights.length; i++) {
+                        for (let i = 0; i < pat.straights.length; i++) {
                             let end: boolean = false;
-                            for (let k = i + 1; k < straights.length; k++) {
-                                if (straights[i].absCard + straights[i].cards.length == straights[k].absCard) {
-                                    for (let m = 0; m < straights[k].cards.length; m++) {
-                                        straights[i].cards.push(straights[k].cards[m]);
+                            for (let k = i + 1; k < pat.straights.length; k++) {
+                                if (pat.straights[i].absCard + pat.straights[i].cards.length == pat.straights[k].absCard) {
+                                    for (let m = 0; m < pat.straights[k].cards.length; m++) {
+                                        pat.straights[i].cards.push(pat.straights[k].cards[m]);
                                     }
-                                    straights.splice(k, 1);
+                                    pat.straights.splice(k, 1);
                                     end = true;
                                     break;
                                 }
@@ -2098,29 +2141,29 @@ module DDZ {
             }
 
             // 双顺(单顺合双顺)
-            if (straights.length > 1) {
-                let len = straights.length;
+            if (pat.straights.length > 1) {
+                let len = pat.straights.length;
                 while (len > 0) {
                     len--;
-                    for (let i = 0; i < straights.length; i++) {
+                    for (let i = 0; i < pat.straights.length; i++) {
                         let end: boolean = false;
-                        for (let k = i + 1; k < straights.length; k++) {
-                            if (straights[i].absCard == straights[k].absCard && straights[i].cards.length == straights[k].cards.length) {
+                        for (let k = i + 1; k < pat.straights.length; k++) {
+                            if (pat.straights[i].absCard == pat.straights[k].absCard && pat.straights[i].cards.length == pat.straights[k].cards.length) {
                                 let pattern = new Pattern();
-                                pattern.absCard = straights[i].absCard;
+                                pattern.absCard = pat.straights[i].absCard;
                                 pattern.cards = [];
                                 pattern.type = PatternType.STRAIGHT2;
-                                for (let m = 0; m < straights[i].cards.length; m++) {
-                                    pattern.cards.push(straights[i].cards[m]);
+                                for (let m = 0; m < pat.straights[i].cards.length; m++) {
+                                    pattern.cards.push(pat.straights[i].cards[m]);
                                 }
-                                for (let m = 0; m < straights[k].cards.length; m++) {
-                                    pattern.cards.push(straights[k].cards[m]);
+                                for (let m = 0; m < pat.straights[k].cards.length; m++) {
+                                    pattern.cards.push(pat.straights[k].cards[m]);
                                 }
                                 pattern.cards.sort();
-                                straights2.push(pattern);
+                                pat.straights2.push(pattern);
 
-                                straights.splice(k, 1);
-                                straights.splice(i, 1);
+                                pat.straights.splice(k, 1);
+                                pat.straights.splice(i, 1);
                                 end = true;
                                 break;
                             }
@@ -2152,38 +2195,38 @@ module DDZ {
                             }
                         }
                     }
-                    pairs.push(pattern);
+                    pat.pairs.push(pattern);
                 }
             }
 
             // 双顺(对子合双顺)
-            if (pairs.length > 2) {
+            if (pat.pairs.length > 2) {
                 removes = [];
 
                 let c = 0;
                 let pattern: Pattern = null;
-                for (let i = 0; i < pairs.length - 1; i++) {
-                    if (pairs[i + 1].absCard != 15 && pairs[i].absCard + 1 == pairs[i + 1].absCard) {
+                for (let i = 0; i < pat.pairs.length - 1; i++) {
+                    if (pat.pairs[i + 1].absCard != 15 && pat.pairs[i].absCard + 1 == pat.pairs[i + 1].absCard) {
                         if (c == 0) c = 2;
                         else if (c == 2) {
                             c = 3;
 
                             pattern = new Pattern();
-                            pattern.absCard = pairs[i - 1].absCard;
+                            pattern.absCard = pat.pairs[i - 1].absCard;
                             pattern.cards = [];
                             pattern.type = PatternType.STRAIGHT2;
 
-                            for (let m = 0; m < pairs[i - 1].cards.length; m++) {
-                                pattern.cards.push(pairs[i - 1].cards[m]);
+                            for (let m = 0; m < pat.pairs[i - 1].cards.length; m++) {
+                                pattern.cards.push(pat.pairs[i - 1].cards[m]);
                             }
-                            for (let m = 0; m < pairs[i].cards.length; m++) {
-                                pattern.cards.push(pairs[i].cards[m]);
+                            for (let m = 0; m < pat.pairs[i].cards.length; m++) {
+                                pattern.cards.push(pat.pairs[i].cards[m]);
                             }
-                            for (let m = 0; m < pairs[i + 1].cards.length; m++) {
-                                pattern.cards.push(pairs[i + 1].cards[m]);
+                            for (let m = 0; m < pat.pairs[i + 1].cards.length; m++) {
+                                pattern.cards.push(pat.pairs[i + 1].cards[m]);
                             }
 
-                            straights2.push(pattern);
+                            pat.straights2.push(pattern);
 
                             removes.push(i - 1);
                             removes.push(i);
@@ -2191,8 +2234,8 @@ module DDZ {
                         }
                         else {
                             c += 1;
-                            for (let m = 0; m < pairs[i + 1].cards.length; m++) {
-                                pattern.cards.push(pairs[i + 1].cards[m]);
+                            for (let m = 0; m < pat.pairs[i + 1].cards.length; m++) {
+                                pattern.cards.push(pat.pairs[i + 1].cards[m]);
                             }
                             removes.push(i + 1);
                         }
@@ -2201,7 +2244,7 @@ module DDZ {
                 }
 
                 for (let i = removes.length - 1; i >= 0; i--) {
-                    pairs.splice(removes[i], 1);
+                    pat.pairs.splice(removes[i], 1);
                 }
             }
 
@@ -2212,35 +2255,102 @@ module DDZ {
                 pattern.cards = [ncards[i]];
                 pattern.type = PatternType.SINGLE;
 
-                singles.push(pattern);
+                pat.singles.push(pattern);
             }
+            pat.singles.sort(this._comparePattern);
+
+            // 添加到牌型列表
+            all.push(pat);
 
 
-            // log
-            for (let i = 0; i < kingbombs.length; i++) {
-                console.log(kingbombs[i].tostring());
+            ///////////////////// 拆单顺子牌型 //////////////////////
+            let pat2: IPatterns = this._copyIPatterns(pat);
+
+            // 完全不考虑单顺,单顺拆开，重新组合对子和单牌
+            if (pat2.straights.length > 0) {
+                for (let i = 0; i < pat2.straights.length; i++) {
+                    let cards = pat2.straights[i].cards;
+                    for (let k = 0; k < cards.length; k++) {
+                        // 在单牌中查询是否可以组成对子
+                        let merger: boolean = false;
+                        for (let m = 0; m < pat2.singles.length; m++) {
+                            let scard = pat2.singles[m].cards[0];
+                            if (this._absoluteCard(scard) == this._absoluteCard(cards[k])) {
+                                merger = true;
+                                pat2.singles.splice(m, 1);
+
+                                let pattern = new Pattern();
+                                pattern.absCard = this._absoluteCard(cards[k]);
+                                pattern.cards = [];
+                                pattern.type = PatternType.PAIR;
+                                pattern.cards.push(cards[k]);
+                                pattern.cards.push(scard);
+
+                                pat2.pairs.push(pattern);
+                                break;
+                            }
+                        }
+                        // 没有合成对子就放入单牌中
+                        if (!merger) {
+                            let pattern = new Pattern();
+                            pattern.absCard = this._absoluteCard(cards[k]);
+                            pattern.cards = [cards[k]];
+                            pattern.type = PatternType.SINGLE;
+
+                            pat2.singles.push(pattern);
+                        }
+                    }
+                }
+
+                pat2.straights = [];
             }
-            for (let i = 0; i < bombs.length; i++) {
-                console.log(bombs[i].tostring());
+
+            // 添加到牌型列表
+            all.push(pat2);
+
+            ///////////////////// 组双顺牌型(只组双顺) //////////////////////
+            let pat3: IPatterns = { straights2: [] };
+            // 牌列表
+            ncards = this._copyCards(cards);
+            // 每张牌数量字典
+            map = {};
+            for (let i = 0; i < ncards.length; i++) {
+                let absCard = this._absoluteCard(ncards[i]);
+                map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
             }
-            for (let i = 0; i < trips.length; i++) {
-                console.log(trips[i].tostring());
+            
+            
+
+            ///////////////////// LOG //////////////////////
+            console.timeEnd("_getAIPatterns");
+            for (let i = 0; i < all.length; i++) {
+                console.log("**********************************");
+                for (let k = 0; k < all[i].kingbombs.length; k++) {
+                    console.log(all[i].kingbombs[k].tostring());
+                }
+                for (let k = 0; k < all[i].bombs.length; k++) {
+                    console.log(all[i].bombs[k].tostring());
+                }
+                for (let k = 0; k < all[i].trips.length; k++) {
+                    console.log(all[i].trips[k].tostring());
+                }
+                for (let k = 0; k < all[i].straights3.length; k++) {
+                    console.log(all[i].straights3[k].tostring());
+                }
+                for (let k = 0; k < all[i].straights2.length; k++) {
+                    console.log(all[i].straights2[k].tostring());
+                }
+                for (let k = 0; k < all[i].straights.length; k++) {
+                    console.log(all[i].straights[k].tostring());
+                }
+                for (let k = 0; k < all[i].pairs.length; k++) {
+                    console.log(all[i].pairs[k].tostring());
+                }
+                for (let k = 0; k < all[i].singles.length; k++) {
+                    console.log(all[i].singles[k].tostring());
+                }
             }
-            for (let i = 0; i < straights3.length; i++) {
-                console.log(straights3[i].tostring());
-            }
-            for (let i = 0; i < straights2.length; i++) {
-                console.log(straights2[i].tostring());
-            }
-            for (let i = 0; i < straights.length; i++) {
-                console.log(straights[i].tostring());
-            }
-            for (let i = 0; i < pairs.length; i++) {
-                console.log(pairs[i].tostring());
-            }
-            for (let i = 0; i < singles.length; i++) {
-                console.log(singles[i].tostring());
-            }
+
             return null;
         }
 

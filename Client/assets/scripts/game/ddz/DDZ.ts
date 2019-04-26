@@ -1729,9 +1729,19 @@ module DDZ {
     }
 
     /**
-     * 全部牌型接口
+     * 牌型价值接口
      */
-    export interface IPatterns {
+    export interface IValue {
+        // 牌型索引
+        index: number;
+        // 价值
+        value: number;
+    }
+
+    /**
+     * 牌型方案
+     */
+    export interface IPatternPlan {
         // 王炸
         kingbombs?: Array<Pattern>;
         // 炸弹
@@ -1751,9 +1761,126 @@ module DDZ {
     }
 
     /**
+     * 牌型价值
+     */
+    const VALUES = {
+        // 单牌价值
+        single: {
+            "3": 1,
+            "4": 1,
+            "5": 1,
+            "6": 1,
+            "7": 1,
+            "8": 1,
+            "9": 1,
+            "10": 1,
+            "11": 2,
+            "12": 3,
+            "13": 4,
+            "14": 4,
+            "15": 6,
+            "16": 8,
+            "17": 8
+        },
+        // 对子价值
+        pair: {
+            "3": 4,
+            "4": 4,
+            "5": 5,
+            "6": 5,
+            "7": 5,
+            "8": 5,
+            "9": 6,
+            "10": 6,
+            "11": 7,
+            "12": 8,
+            "13": 9,
+            "14": 10,
+            "15": 12
+        },
+        // 三条价值
+        trip: {
+            "3": 9,
+            "4": 9,
+            "5": 10,
+            "6": 10,
+            "7": 11,
+            "8": 11,
+            "9": 12,
+            "10": 12,
+            "11": 13,
+            "12": 13,
+            "13": 15,
+            "14": 18,
+            "15": 20
+        },
+        // 单顺的价值
+        straight: {
+            "5": 15,
+            "6": 17,
+            "7": 19,
+            "8": 21,
+            "9": 22,
+            "10": 23,
+            "11": 24,
+            "12": 25
+        },
+        // 双顺的价值
+        straight2: {
+            "3": 17,
+            "4": 21,
+            "5": 24,
+            "6": 28,
+            "7": 32,
+            "8": 36,
+            "9": 40,
+            "10": 44
+        },
+        // 三顺的价值
+        straight3: {
+            "2": 18,
+            "3": 24,
+            "4": 30,
+            "5": 36,
+            "6": 42
+        },
+        // 炸弹
+        bomb: {
+            "3": 13,
+            "4": 14,
+            "5": 15,
+            "6": 16,
+            "7": 17,
+            "8": 18,
+            "9": 19,
+            "10": 20,
+            "11": 21,
+            "12": 22,
+            "13": 24,
+            "14": 26,
+            "15": 28
+        },
+        // 王炸
+        kingBomb: 15
+    };
+
+    /**
      * AI
      */
     export class AI {
+
+        /**
+         * 第一次出牌提示
+         * @param cards 
+         */
+        public static dcFirstAssist(cards: Array<number>): void {
+            let plans = this._analysis(cards);
+            let maxValue = this._calculateBestPlanIndex(plans);
+            let plan = plans[maxValue.index];
+
+
+        }
+
         /**
         * 将外部数据的牌编号,变成内部方便比较大小的绝对值
         * @param cards 
@@ -1804,8 +1931,8 @@ module DDZ {
          * copy IPattern
          * @param patterns 
          */
-        private static _copyIPatterns(patterns: IPatterns): IPatterns {
-            let npatterns: IPatterns = {};
+        private static _copyIPatterns(patterns: IPatternPlan): IPatternPlan {
+            let npatterns: IPatternPlan = {};
             npatterns.kingbombs = this._copyPatterns(patterns.kingbombs);
             npatterns.bombs = this._copyPatterns(patterns.bombs);
             npatterns.trips = this._copyPatterns(patterns.trips);
@@ -1848,68 +1975,217 @@ module DDZ {
         }
 
         /**
-         * 获取牌型(完全不考虑顺子)
+         * 分析牌型方案
          * @param cards 
+         * @returns Array<IPatternPlan>
          */
-        private static _getPatterns(cards: Array<number>): Array<Pattern> {
-            let patterns: Array<Pattern> = [];
-            for (let i = 0; i < cards.length; i++) {
-                let card = cards[i];
-                let absCard = this._absoluteCard(card);
-                let insert = false;
-                for (let k = 0; k < patterns.length; k++) {
-                    let pattern = <Pattern>patterns[k];
-                    if (pattern.absCard == absCard) {
-                        pattern.cards.push(card);
-                        if (pattern.type == PatternType.SINGLE) {
-                            pattern.type = PatternType.PAIR;
-                        } else if (pattern.type == PatternType.PAIR) {
-                            pattern.type = PatternType.TRIP;
-                        } else if (pattern.type == PatternType.TRIP) {
-                            pattern.type = PatternType.BOMB;
+        private static _analysis(cards: Array<number>): Array<IPatternPlan> {
+            console.time("_getAIPatterns");
+            // 牌型方案
+            let plans: Array<IPatternPlan> = [];
+
+            let removes: Array<number> = [];
+            let ncards = this._copyCards(cards);
+            let map: { [index: number]: number } = {};
+
+            //方案一,不拆三条，不拆顺子牌型
+            let pat = this._normalPatternPlan(ncards);
+            plans.push(pat);
+
+            //方案二, 拆单顺子牌型
+            let pat2: IPatternPlan = this._copyIPatterns(pat);
+            // 完全不考虑单顺,单顺拆开，重新组合对子和单牌
+            if (pat2.straights.length > 0) {
+                for (let i = 0; i < pat2.straights.length; i++) {
+                    let cards = pat2.straights[i].cards;
+                    for (let k = 0; k < cards.length; k++) {
+                        // 在单牌中查询是否可以组成对子
+                        let merger: boolean = false;
+                        for (let m = 0; m < pat2.singles.length; m++) {
+                            let scard = pat2.singles[m].cards[0];
+                            if (this._absoluteCard(scard) == this._absoluteCard(cards[k])) {
+                                merger = true;
+                                pat2.singles.splice(m, 1);
+
+                                let pattern = new Pattern();
+                                pattern.absCard = this._absoluteCard(cards[k]);
+                                pattern.cards = [];
+                                pattern.type = PatternType.PAIR;
+                                pattern.cards.push(cards[k]);
+                                pattern.cards.push(scard);
+
+                                pat2.pairs.push(pattern);
+                                break;
+                            }
                         }
-                        insert = true;
+                        // 没有合成对子就放入单牌中
+                        if (!merger) {
+                            let pattern = new Pattern();
+                            pattern.absCard = this._absoluteCard(cards[k]);
+                            pattern.cards = [cards[k]];
+                            pattern.type = PatternType.SINGLE;
+
+                            pat2.singles.push(pattern);
+                        }
+                    }
+                }
+
+                pat2.straights = [];
+            }
+            plans.push(pat2);
+
+            //方案三, 组双顺牌型(优先组双顺)
+            let _pat: IPatternPlan = { straights2: [] };
+            // 牌列表
+            ncards = this._copyCards(cards);
+            // 每张牌数量字典
+            map = {};
+            for (let i = 0; i < ncards.length; i++) {
+                let absCard = this._absoluteCard(ncards[i]);
+                map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
+            }
+            let len: number = Math.ceil(ncards.length / 3);
+            while (len > 0) {
+                len--;
+                // 最小3，最大A
+                let c: number = 0;
+                for (let i = 3; i < 15; i++) {
+                    if (this._existObj(map[i])) {
+                        if (map[i] >= 2) {
+                            c++;
+                        } else {
+                            if (c >= 3) {
+                                let pattern = new Pattern();
+                                pattern.cards = [];
+                                pattern.type = PatternType.STRAIGHT2;
+                                for (let k = 0; k < c; k++) {
+                                    let absCard = i - k - 1;
+                                    console.log(absCard);
+                                    for (let n = 0; n < 2; n++) {
+                                        for (let m = 0; m < ncards.length; m++) {
+                                            if (absCard == this._absoluteCard(ncards[m])) {
+                                                pattern.cards.push(ncards[m])
+                                                ncards.splice(m, 1);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    map[absCard] -= 2;
+                                }
+
+                                pattern.cards.sort();
+                                pattern.absCard = this._absoluteCard(pattern.cards[0]);
+                                _pat.straights2.push(pattern);
+                            }
+                            c = 0;
+                            break;
+                        }
+                    }
+                    else {
+                        if (c >= 3) {
+                            let pattern = new Pattern();
+                            pattern.cards = [];
+                            pattern.type = PatternType.STRAIGHT2;
+
+                            for (let k = 0; k < c; k++) {
+                                let absCard = i - k - 1;
+                                for (let n = 0; n < 2; n++) {
+                                    for (let m = 0; m < ncards.length; m++) {
+                                        if (absCard == this._absoluteCard(ncards[m])) {
+                                            pattern.cards.push(ncards[m])
+                                            ncards.splice(m, 1);
+                                            break;
+                                        }
+                                    }
+                                }
+                                map[absCard] -= 2;
+                            }
+                            pattern.cards.sort();
+                            pattern.absCard = this._absoluteCard(pattern.cards[0]);
+                            _pat.straights2.push(pattern);
+                        }
+                        c = 0;
                         break;
                     }
                 }
-                if (!insert) {
-                    let pattern = new Pattern();
-                    pattern.absCard = absCard;
-                    pattern.cards = [card];
-                    pattern.type = PatternType.SINGLE;
+            }
+            // 添加到牌型列表
+            let pat3 = this._normalPatternPlan(ncards);
+            pat3.straights2 = _pat.straights2;
+            plans.push(pat3);
 
-                    patterns.push(pattern);
+            //方案四, 固定单一牌型
+            ncards = this._copyCards(cards);
+            let pat4 = this._singlePatternPlan(ncards);
+            plans.push(pat4);
+
+            // 方案五，方案一的扩展，砍掉单顺的头尾，与单牌组成对子
+            // TODO
+
+            console.timeEnd("_getAIPatterns");
+            ///////////////////// LOG //////////////////////
+
+            for (let i = 0; i < plans.length; i++) {
+                console.log("**********************************");
+                console.log("牌型价值: " + this._calculatePlanValue(plans[i]));
+                if (plans[i].kingbombs) {
+                    for (let k = 0; k < plans[i].kingbombs.length; k++) {
+                        console.log(plans[i].kingbombs[k].tostring());
+                    }
                 }
-            }
-            // 大小王重新分析
-            let kings: Array<number> = [];
-            for (let i = 0; i < patterns.length; i++) {
-                let pattern = patterns[i];
-                if (pattern.absCard == 16) {
-                    kings.push(i);
+
+                if (plans[i].bombs) {
+                    for (let k = 0; k < plans[i].bombs.length; k++) {
+                        console.log(plans[i].bombs[k].tostring());
+                    }
                 }
-                else if (pattern.absCard == 17) {
-                    kings.push(i);
+
+                if (plans[i].trips) {
+                    for (let k = 0; k < plans[i].trips.length; k++) {
+                        console.log(plans[i].trips[k].tostring());
+                    }
                 }
-                if (kings.length == 2) break;
+
+                if (plans[i].straights3) {
+                    for (let k = 0; k < plans[i].straights3.length; k++) {
+                        console.log(plans[i].straights3[k].tostring());
+                    }
+                }
+
+                if (plans[i].straights2) {
+                    for (let k = 0; k < plans[i].straights2.length; k++) {
+                        console.log(plans[i].straights2[k].tostring());
+                    }
+                }
+
+                if (plans[i].straights) {
+                    for (let k = 0; k < plans[i].straights.length; k++) {
+                        console.log(plans[i].straights[k].tostring());
+                    }
+                }
+
+                if (plans[i].pairs) {
+                    for (let k = 0; k < plans[i].pairs.length; k++) {
+                        console.log(plans[i].pairs[k].tostring());
+                    }
+                }
+
+                if (plans[i].singles) {
+                    for (let k = 0; k < plans[i].singles.length; k++) {
+                        console.log(plans[i].singles[k].tostring());
+                    }
+                }
+
             }
-            if (kings.length == 2) {
-                patterns[kings[0]].type = PatternType.KING_BOMB;
-                patterns[kings[0]].cards.push(patterns[kings[1]].cards[0]);
-                patterns.splice(kings[1], 1);
-            }
-            return patterns
+
+            return plans;
         }
 
         /**
-         * 获取牌型(按一个AI规则取一个最佳的)
+         * 牌型方案(第一种)
          * @param cards 
          */
-        private static _getAIPatterns(cards: Array<number>): Array<Pattern> {
-            console.time("_getAIPatterns");
-            // 所有牌型
-            let all: Array<IPatterns> = [];
-
+        private static _normalPatternPlan(cards: Array<number>): IPatternPlan {
             let removes: Array<number> = [];
             let ncards = this._copyCards(cards);
 
@@ -1920,8 +2196,7 @@ module DDZ {
                 map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
             }
 
-            ///////////////////// 不拆三条，不拆炸弹的牌型 //////////////////////
-            let pat: IPatterns = { kingbombs: [], bombs: [], trips: [], straights3: [], straights2: [], straights: [], pairs: [], singles: [] };
+            let pat: IPatternPlan = { kingbombs: [], bombs: [], trips: [], straights3: [], straights2: [], straights: [], pairs: [], singles: [] };
 
             // 双王
             if (this._existObj(map[17]) && this._existObj(map[16])) {
@@ -1941,7 +2216,7 @@ module DDZ {
                 pattern.cards = [2, 3];
                 pattern.type = PatternType.KING_BOMB;
 
-                kingbombs.push(pattern);
+                pat.kingbombs.push(pattern);
             }
 
             // 炸弹，三条
@@ -2259,103 +2534,164 @@ module DDZ {
             }
             pat.singles.sort(this._comparePattern);
 
-            // 添加到牌型列表
-            all.push(pat);
+            return pat;
+        }
 
-
-            ///////////////////// 拆单顺子牌型 //////////////////////
-            let pat2: IPatterns = this._copyIPatterns(pat);
-
-            // 完全不考虑单顺,单顺拆开，重新组合对子和单牌
-            if (pat2.straights.length > 0) {
-                for (let i = 0; i < pat2.straights.length; i++) {
-                    let cards = pat2.straights[i].cards;
-                    for (let k = 0; k < cards.length; k++) {
-                        // 在单牌中查询是否可以组成对子
-                        let merger: boolean = false;
-                        for (let m = 0; m < pat2.singles.length; m++) {
-                            let scard = pat2.singles[m].cards[0];
-                            if (this._absoluteCard(scard) == this._absoluteCard(cards[k])) {
-                                merger = true;
-                                pat2.singles.splice(m, 1);
-
-                                let pattern = new Pattern();
-                                pattern.absCard = this._absoluteCard(cards[k]);
-                                pattern.cards = [];
-                                pattern.type = PatternType.PAIR;
-                                pattern.cards.push(cards[k]);
-                                pattern.cards.push(scard);
-
-                                pat2.pairs.push(pattern);
-                                break;
-                            }
+        /**
+         * 牌型方案(第二种)
+         * @param cards 
+         */
+        private static _singlePatternPlan(cards: Array<number>): IPatternPlan {
+            let patterns: Array<Pattern> = [];
+            for (let i = 0; i < cards.length; i++) {
+                let card = cards[i];
+                let absCard = this._absoluteCard(card);
+                let insert = false;
+                for (let k = 0; k < patterns.length; k++) {
+                    let pattern = <Pattern>patterns[k];
+                    if (pattern.absCard == absCard) {
+                        pattern.cards.push(card);
+                        if (pattern.type == PatternType.SINGLE) {
+                            pattern.type = PatternType.PAIR;
+                        } else if (pattern.type == PatternType.PAIR) {
+                            pattern.type = PatternType.TRIP;
+                        } else if (pattern.type == PatternType.TRIP) {
+                            pattern.type = PatternType.BOMB;
                         }
-                        // 没有合成对子就放入单牌中
-                        if (!merger) {
-                            let pattern = new Pattern();
-                            pattern.absCard = this._absoluteCard(cards[k]);
-                            pattern.cards = [cards[k]];
-                            pattern.type = PatternType.SINGLE;
-
-                            pat2.singles.push(pattern);
-                        }
+                        insert = true;
+                        break;
                     }
                 }
+                if (!insert) {
+                    let pattern = new Pattern();
+                    pattern.absCard = absCard;
+                    pattern.cards = [card];
+                    pattern.type = PatternType.SINGLE;
 
-                pat2.straights = [];
-            }
-
-            // 添加到牌型列表
-            all.push(pat2);
-
-            ///////////////////// 组双顺牌型(只组双顺) //////////////////////
-            let pat3: IPatterns = { straights2: [] };
-            // 牌列表
-            ncards = this._copyCards(cards);
-            // 每张牌数量字典
-            map = {};
-            for (let i = 0; i < ncards.length; i++) {
-                let absCard = this._absoluteCard(ncards[i]);
-                map[absCard] = map[absCard] ? map[absCard] + 1 : 1;
-            }
-            
-            
-
-            ///////////////////// LOG //////////////////////
-            console.timeEnd("_getAIPatterns");
-            for (let i = 0; i < all.length; i++) {
-                console.log("**********************************");
-                for (let k = 0; k < all[i].kingbombs.length; k++) {
-                    console.log(all[i].kingbombs[k].tostring());
-                }
-                for (let k = 0; k < all[i].bombs.length; k++) {
-                    console.log(all[i].bombs[k].tostring());
-                }
-                for (let k = 0; k < all[i].trips.length; k++) {
-                    console.log(all[i].trips[k].tostring());
-                }
-                for (let k = 0; k < all[i].straights3.length; k++) {
-                    console.log(all[i].straights3[k].tostring());
-                }
-                for (let k = 0; k < all[i].straights2.length; k++) {
-                    console.log(all[i].straights2[k].tostring());
-                }
-                for (let k = 0; k < all[i].straights.length; k++) {
-                    console.log(all[i].straights[k].tostring());
-                }
-                for (let k = 0; k < all[i].pairs.length; k++) {
-                    console.log(all[i].pairs[k].tostring());
-                }
-                for (let k = 0; k < all[i].singles.length; k++) {
-                    console.log(all[i].singles[k].tostring());
+                    patterns.push(pattern);
                 }
             }
 
-            return null;
+            // 大小王重新分析
+            let kings: Array<number> = [];
+            for (let i = 0; i < patterns.length; i++) {
+                let pattern = patterns[i];
+                if (pattern.absCard == 16) {
+                    kings.push(i);
+                }
+                else if (pattern.absCard == 17) {
+                    kings.push(i);
+                }
+                if (kings.length == 2) break;
+            }
+            if (kings.length == 2) {
+                patterns[kings[0]].type = PatternType.KING_BOMB;
+                patterns[kings[0]].cards.push(patterns[kings[1]].cards[0]);
+                patterns.splice(kings[1], 1);
+            }
+
+            // 牌型方案
+            let plan: IPatternPlan = { singles: [], pairs: [], trips: [], bombs: [], kingbombs: [] };
+            for (let k = 0; k < patterns.length; k++) {
+                if (patterns[k].type == PatternType.SINGLE) {
+                    plan.singles.push(patterns[k]);
+                } else if (patterns[k].type == PatternType.PAIR) {
+                    plan.pairs.push(patterns[k]);
+                } else if (patterns[k].type == PatternType.TRIP) {
+                    plan.trips.push(patterns[k]);
+                } else if (patterns[k].type == PatternType.BOMB) {
+                    plan.bombs.push(patterns[k]);
+                } else if (patterns[k].type == PatternType.KING_BOMB) {
+                    plan.kingbombs.push(patterns[k]);
+                }
+            }
+
+            return plan
+        }
+
+        /**
+         * 计算牌型分析方案里最好牌型索引
+         * @param plans 
+         */
+        private static _calculateBestPlanIndex(plans: Array<IPatternPlan>): IValue {
+            let maxValue: IValue = { index: 0, value: 0 };
+            for (let i = 0; i < plans.length; i++) {
+                let sumValue: number = this._calculatePlanValue(plans[i]);
+                if (maxValue.value < sumValue) {
+                    maxValue.value = sumValue;
+                    maxValue.index = i;
+                }
+            }
+            return maxValue;
+        }
+
+        /**
+         * 计算牌型方案的价值
+         * @param plan 
+         */
+        private static _calculatePlanValue(plan: IPatternPlan): number {
+            let sumValue: number = 0;
+            if (plan.kingbombs) {
+                for (let k = 0; k < plan.kingbombs.length; k++) {
+                    sumValue += VALUES.kingBomb;
+                }
+            }
+
+            if (plan.bombs) {
+                for (let k = 0; k < plan.bombs.length; k++) {
+                    sumValue += VALUES.bomb[plan.bombs[k].absCard];
+                }
+            }
+
+            if (plan.trips) {
+                for (let k = 0; k < plan.trips.length; k++) {
+                    sumValue += VALUES.trip[plan.trips[k].absCard];
+                }
+            }
+
+            if (plan.straights3) {
+                for (let k = 0; k < plan.straights3.length; k++) {
+                    sumValue += VALUES.straight3[Math.ceil(plan.straights3[k].cards.length / 3)];
+                }
+            }
+
+            if (plan.straights2) {
+                for (let k = 0; k < plan.straights2.length; k++) {
+                    sumValue += VALUES.straight2[Math.ceil(plan.straights3[k].cards.length / 2)];
+                }
+            }
+
+            if (plan.straights) {
+                for (let k = 0; k < plan.straights.length; k++) {
+                    sumValue += VALUES.straight[Math.ceil(plan.straights[k].cards.length)];
+                }
+            }
+
+            if (plan.pairs) {
+                for (let k = 0; k < plan.pairs.length; k++) {
+                    sumValue += VALUES.pair[plan.pairs[k].absCard];
+                }
+            }
+
+            if (plan.singles) {
+                for (let k = 0; k < plan.singles.length; k++) {
+                    sumValue += VALUES.single[plan.singles[k].absCard];
+                }
+            }
+            return sumValue;
+        }
+
+        /**M 
+         * 方案牌型下的牌进行排序
+         * @param plan 
+         * @param remainCards 
+         */
+        private static _sortPlan(plan: IPatternPlan, remainCards: Array<number>) {
+
         }
 
         public static test(cards: Array<number>) {
-            this._getAIPatterns(cards);
+            this._analysis(cards);
         }
     }
 
